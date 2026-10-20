@@ -1,0 +1,22 @@
+# Bilingual-pair consistency record for 2026-09-17-finance-local-python-bridge.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-17-finance-local-python-bridge.md
+/agent-note-financial-market-analysis-drives-an-external-python-project:
+  en: 3d78ef2d0114af95
+  zh: aada197d560ca6fd
+/agent-note-financial-market-analysis-drives-an-external-python-project/problem:
+  en: 6a9720ffb167d817
+  zh: c6bf851c3bbc6a56
+/agent-note-financial-market-analysis-drives-an-external-python-project/decision:
+  en: af2b701188494e70
+  zh: 503d40028edb3251
+/agent-note-financial-market-analysis-drives-an-external-python-project/consequences:
+  en: 4d6d49ef50748ce3
+  zh: b9ea18e5d055aa98
+/agent-note-financial-market-analysis-drives-an-external-python-project/alternatives-considered:
+  en: 2d3243ab3cc0e14e
+  zh: 0896b1c610e77067
+/agent-note-financial-market-analysis-drives-an-external-python-project/testing:
+  en: f65fb0544ad4e4cd
+  zh: 481bedc5bfec175e

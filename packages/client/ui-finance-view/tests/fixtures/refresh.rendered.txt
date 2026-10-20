@@ -1,0 +1,200 @@
+```json
+{
+  "force": false,
+  "datasets": {
+    "csi300_daily": {
+      "rows": 5996,
+      "first_date": "2002-01-04T00:00:00",
+      "last_date": "2026-09-18T00:00:00"
+    },
+    "csi2000_daily": {
+      "rows": 3094,
+      "first_date": "2013-12-31T00:00:00",
+      "last_date": "2026-09-18T00:00:00"
+    },
+    "etf_159330": {
+      "rows": 507,
+      "first_date": "2024-08-19T00:00:00",
+      "last_date": "2026-09-18T00:00:00"
+    },
+    "etf_159531": {
+      "rows": 728,
+      "first_date": "2023-09-18T00:00:00",
+      "last_date": "2026-09-18T00:00:00"
+    },
+    "csi300_valuation": {
+      "rows": 258,
+      "first_date": "2005-04-29T00:00:00",
+      "last_date": "2026-09-18T00:00:00"
+    },
+    "csi2000_valuation": {
+      "rows": 20,
+      "first_date": "2026-08-24T00:00:00",
+      "last_date": "2026-09-18T00:00:00"
+    },
+    "bond_yield_10y": {
+      "rows": 6174,
+      "first_date": "2002-01-04T00:00:00",
+      "last_date": "2026-09-18T00:00:00"
+    }
+  },
+  "macro": {
+    "rows": 8052,
+    "first_date": "1994-01-01T00:00:00",
+    "last_date": "2026-09-18T00:00:00"
+  },
+  "cache": {
+    "directory": "/Users/hyj/PycharmProjects/StockMarket/data",
+    "files": [
+      {
+        "file": "bond_yield_10y.parquet",
+        "modified": "2026-09-19T23:09:43"
+      },
+      {
+        "file": "valuation_932000.parquet",
+        "modified": "2026-09-19T23:09:16"
+      },
+      {
+        "file": "valuation_000300.parquet",
+        "modified": "2026-09-19T23:09:15"
+      },
+      {
+        "file": "margin_balance.parquet",
+        "modified": "2026-09-19T22:08:29"
+      },
+      {
+        "file": "fed_rate.parquet",
+        "modified": "2026-09-19T22:08:26"
+      },
+      {
+        "file": "china_macro_monthly.parquet",
+        "modified": "2026-09-19T22:08:24"
+      },
+      {
+        "file": "bond_spread.parquet",
+        "modified": "2026-09-19T22:08:17"
+      },
+      {
+        "file": "gold_daily.parquet",
+        "modified": "2026-09-19T22:08:17"
+      },
+      {
+        "file": "fx_daily.parquet",
+        "modified": "2026-09-19T22:07:54"
+      },
+      {
+        "file": "etf_159330_daily.parquet",
+        "modified": "2026-09-19T22:07:26"
+      },
+      {
+        "file": "etf_159531_daily.parquet",
+        "modified": "2026-09-19T22:07:26"
+      },
+      {
+        "file": "csi2000_daily.parquet",
+        "modified": "2026-09-19T22:07:24"
+      },
+      {
+        "file": "csi300_daily.parquet",
+        "modified": "2026-09-19T22:07:14"
+      },
+      {
+        "file": "etf_515030_daily.parquet",
+        "modified": "2026-09-18T00:04:00"
+      },
+      {
+        "file": "etf_512690_daily.parquet",
+        "modified": "2026-09-18T00:03:59"
+      },
+      {
+        "file": "etf_159611_daily.parquet",
+        "modified": "2026-09-18T00:03:58"
+      },
+      {
+        "file": "etf_159928_daily.parquet",
+        "modified": "2026-09-18T00:03:58"
+      },
+      {
+        "file": "etf_512010_daily.parquet",
+        "modified": "2026-09-18T00:03:56"
+      },
+      {
+        "file": "etf_512480_daily.parquet",
+        "modified": "2026-09-18T00:03:56"
+      },
+      {
+        "file": "etf_512660_daily.parquet",
+        "modified": "2026-09-18T00:03:56"
+      },
+      {
+        "file": "etf_512880_daily.parquet",
+        "modified": "2026-09-18T00:03:54"
+      },
+      {
+        "file": "etf_515220_daily.parquet",
+        "modified": "2026-09-18T00:03:54"
+      },
+      {
+        "file": "futures_JM0_daily.parquet",
+        "modified": "2026-09-18T00:03:54"
+      },
+      {
+        "file": "etf_512400_daily.parquet",
+        "modified": "2026-09-18T00:03:53"
+      },
+      {
+        "file": "futures_CU0_daily.parquet",
+        "modified": "2026-09-18T00:03:53"
+      },
+      {
+        "file": "etf_159587_daily.parquet",
+        "modified": "2026-09-18T00:03:52"
+      },
+      {
+        "file": "futures_C0_daily.parquet",
+        "modified": "2026-09-18T00:03:51"
+      },
+      {
+        "file": "futures_M0_daily.parquet",
+        "modified": "2026-09-18T00:03:51"
+      },
+      {
+        "file": "futures_SR0_daily.parquet",
+        "modified": "2026-09-18T00:03:51"
+      },
+      {
+        "file": "etf_159825_daily.parquet",
+        "modified": "2026-09-18T00:03:50"
+      },
+      {
+        "file": "new_accounts.parquet",
+        "modified": "2026-08-12T23:41:36"
+      },
+      {
+        "file": "csi2000_daily_full.parquet",
+        "modified": "2026-08-11T22:48:04"
+      },
+      {
+        "file": "etf_159531_sina.parquet",
+        "modified": "2026-08-11T22:48:04"
+      },
+      {
+        "file": "synth_etf_159330.parquet",
+        "modified": "2026-08-10T18:16:43"
+      },
+      {
+        "file": "synth_etf_159531.parquet",
+        "modified": "2026-08-10T18:16:43"
+      },
+      {
+        "file": "index_000300_daily.parquet",
+        "modified": "2026-08-09T23:07:20"
+      },
+      {
+        "file": "index_932000_daily.parquet",
+        "modified": "2026-08-09T23:07:20"
+      }
+    ]
+  }
+}
+```

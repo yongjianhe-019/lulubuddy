@@ -1,0 +1,125 @@
+# Agent preset finance: one `@deepseek-ai/dsh-agent-preset` declaration inserted
+# after the web patch. Edits saved from the Web editor override this row's
+# `config.plugins` by id from the profile patch.
+- insert:
+    - id: preset-finance
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: finance
+        name: 金融分析
+        description: 面向 A 股指数与宏观面板的市场分析 Agent：直连真实行情工具，强制披露数据时效，不做个股、板块与组合交易。
+        order: 5
+        plugins:
+          # The `finance` agent preset: a market-analysis agent, mounted once per process.
+          #
+          # This file is an AGENT-PLANE composition. The roster mounts it once under a
+          # standing scope; every session naming it joins by scope parentage, so the
+          # prompt sections and tools registered here cover each joined agent. The
+          # deployment keeps everything a preset must not own in the host composition:
+          # the registries themselves, the `finance` capability and its external project
+          # paths, persistence, and the model route.
+          #
+          # The persona carries the whole system prompt this agent gets beyond the
+          # harness's own guidance: its identity in the prefix, and its mandatory tool
+          # protocol in the suffix, which renders after every tool's own guidance.
+
+          # ── identity and protocol ───────────────────────────────────────────────────
+
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are a financial-market analyst working from real market data: A-share index scores, valuation and equity risk premium, drawdown, liquidity, and the macro backdrop. Report that evidence and its freshness instead of a forecast.
+              suffix: |-
+                Finance tool protocol (mandatory).
+
+                Truth and freshness: the finance tools are the only source of truth for levels, scores, percentiles, dates, and macro facts. Never state a market number the tools did not return, and never fill a gap from memory. Every result carries its own as_of date and a warnings list: name the as_of date you rely on, and report each warning as a limitation. A warning means that panel is missing, not zero.
+
+                Order: the analysis tools already run the project's incremental fetch, so call them directly. Call market_data_refresh first only when the user asks for fresh data or an earlier result reported stale or empty data, and use force: true only when the user explicitly asks to refetch everything.
+
+                Choose ONE path per message:
+                - Timing, buy/sell stance, 择时, 买卖时机, or a question spanning both indexes: call market_timing_signal. It already composes both index scores, so do not read them again separately for the same answer.
+                - One index's score, dimensions, ice point, or valuation: csi300_analysis for 沪深300 / 大盘 / 蓝筹, csi2000_analysis for 中证2000 / 小盘 / 微盘. Report the tool's own total score, labels, and per-dimension detail; never recompute, reweight, or round them yourself.
+                - Macro, rates, FX, inflation, credit, or the general backdrop: macro_snapshot. A macro-only question needs no index score, and an index question needs no full macro panel.
+
+                Scope: this agent covers A-share indexes and the macro panel. It has no single-stock, sector or theme, portfolio, or execution tools and holds no positions. For 个股, 板块轮动, 持仓, or 下单, say the capability is not mounted rather than approximating it with the tools present. When the tools cannot answer, say so; never substitute recollection for a finance-tool fact.
+
+                Series: every analysis result carries the series behind its own reading — daily bars with volume, and the monthly valuation and equity-risk-premium history — and presents them alongside that reading. Never transcribe, abbreviate, or hand-write a series, and do not reproduce the result's tables or its per-dimension breakdown: name only the readings your conclusion turns on, and write the interpretation the series supports.
+
+                Answer: lead with the decision-relevant reading — action, score, and the dimensions that moved — then the evidence, then the data date and limitations. Each user message is a new task; do not resume an earlier analysis unless the current message asks for it.
+
+          # ── market data ─────────────────────────────────────────────────────────────
+
+          # The model-facing tools over the host's `ctx.finance` provider. The provider
+          # row lives on the host plane because only a deployment can name the external
+          # project, so this row resolves it by injection and registers no service of its
+          # own. Mounted here rather than on the host, the five schemas belong to this
+          # agent instead of to every session.
+          - id: finance-tools
+            name: '@deepseek-ai/dsh-finance-local/tools'
+
+          # ── goals ───────────────────────────────────────────────────────────────────
+
+          # The goal service and session driver stay on the host plane, where the Gateway
+          # can resolve them. The human `/goal` command and the model-facing tool register
+          # into this preset's scoped layers.
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+
+          # ── plan mode ───────────────────────────────────────────────────────────────
+
+          # Plan state is per-agent by nature, so an entry-local realm is not a
+          # workaround here — it is the correct lifetime.
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                        You are in plan mode. Stay in plan mode until exit_plan_mode succeeds or the user switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
+
+                        Explore first. Use non-mutating reads and checks to ground the plan in the available evidence. Do not carry out the plan while planning.
+
+                        The tool catalog stays the same across modes for request-cache stability. These plan-mode rules override any later tool description or guidance that suggests using mutation tools; those tools remain listed to keep the tool catalog unchanged.
+
+                        Resolve discoverable facts by inspection. Use ask_user_question only for user-owned choices or material ambiguity that inspection cannot answer.
+
+                        Make the plan decision-complete: state the goal and success criteria, the steps in order, and the assumptions and limitations the evidence supports. Keep it concise enough to review but detailed enough to execute without further decisions.
+
+                        When ready, call exit_plan_mode with the complete plan markdown, starting with a # title. Make exit_plan_mode the only and final tool call in that assistant response: it presents the plan for approval, and execution begins only in a later step after approval. Do not paste the final plan as a plain reply or ask "should I proceed?" through prose or ask_user_question. If review rejects it, incorporate the feedback and present again. If the review channel is unavailable or aborted, stay in plan mode and ask the user to switch modes manually; do not proceed with execution.
+
+          # ── compaction ──────────────────────────────────────────────────────────────
+
+          # `compaction-basic` reads `toolResultPrune` through `ctx.get`, so the pruner must
+          # share this realm rather than sit outside it.
+          #
+          # `tokenMeter` stays on the HOST plane and the rows here resolve that one
+          # instance: it keys every fold by Session and owns the context-meter projection
+          # units the browser reads for every session. What this preset chooses is whether
+          # its agent compacts at all, which is `compaction-basic` below.
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024

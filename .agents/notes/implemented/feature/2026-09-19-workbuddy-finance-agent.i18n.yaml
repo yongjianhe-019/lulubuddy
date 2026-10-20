@@ -1,0 +1,31 @@
+# Bilingual-pair consistency record for 2026-09-19-workbuddy-finance-agent.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-19-workbuddy-finance-agent.md
+/agent-note-the-scenario-becomes-a-finance-agent-preset:
+  en: 541e6f76828ef081
+  zh: 832661c0c975e2cc
+/agent-note-the-scenario-becomes-a-finance-agent-preset/problem:
+  en: b1114c5474a67e3f
+  zh: 3f4cce815c6a75e9
+/agent-note-the-scenario-becomes-a-finance-agent-preset/decision:
+  en: 62fd116f14d0e72d
+  zh: 53d1c773646768c4
+/agent-note-the-scenario-becomes-a-finance-agent-preset/decision/two-entries-two-owners:
+  en: 116dc9cf0b746a40
+  zh: d3f06f92a4a73524
+/agent-note-the-scenario-becomes-a-finance-agent-preset/decision/the-protocol:
+  en: 7d6af8b321b93b70
+  zh: ed18c782cacf797e
+/agent-note-the-scenario-becomes-a-finance-agent-preset/decision/the-pick-opens-a-session:
+  en: ac3b85de48d484f6
+  zh: 0f8afa480136c388
+/agent-note-the-scenario-becomes-a-finance-agent-preset/alternatives-considered:
+  en: 1eecbf19f43b2919
+  zh: 254a685f62782a05
+/agent-note-the-scenario-becomes-a-finance-agent-preset/consequences:
+  en: 786e856f87be2f92
+  zh: e2e050e4410e0e14
+/agent-note-the-scenario-becomes-a-finance-agent-preset/testing:
+  en: bb334ac443e395d2
+  zh: b61b83382288c7d6

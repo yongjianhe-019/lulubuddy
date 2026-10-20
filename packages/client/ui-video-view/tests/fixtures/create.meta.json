@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "output": "/Users/hyj/.dsh/video/out/real-render-check.mp4",
+  "url": "/video/out/real-render-check.mp4",
+  "bytes": 1277851,
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "durationMs": 8112,
+  "title": "真机渲染验证",
+  "voice": "zh-CN-XiaoxiaoNeural",
+  "scenes": [
+    {
+      "index": 0,
+      "narration": "第一句，市场估值处于历史中位。",
+      "startMs": 0,
+      "endMs": 4200,
+      "cached": true
+    },
+    {
+      "index": 1,
+      "heading": "两个要点",
+      "narration": "第二句，耐心等待更好的价格。",
+      "startMs": 4200,
+      "endMs": 8112,
+      "cached": true
+    }
+  ]
+}

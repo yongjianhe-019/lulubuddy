@@ -1,0 +1,207 @@
+/**
+ * Model-facing finance tools over `ctx.finance`, mounted as the package's
+ * `tools` entry so a session's agent is what sees them. This module owns the
+ * tool schemas, argument validation the schema cannot express, result
+ * presentation, and the per-call timeout budget; the capability itself stays
+ * behind the seam, so a different provider changes none of these contracts.
+ *
+ * @module @deepseek-ai/dsh-finance-local/tools
+ */
+
+import type { Context } from '@deepseek-ai/cordis'
+import z from '@deepseek-ai/schemastery'
+import { defineTool } from '@deepseek-ai/dsh-tools'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
+import { readFinanceCharts } from './charts.ts'
+import type { FinanceRuntime } from './service.ts'
+import type { FinanceOutcome } from './types.ts'
+
+/** Cordis plugin name used by loader diagnostics. */
+export const name = 'finance-tools'
+
+/**
+ * The capability this entry presents and the registry it registers into. Both
+ * are host-plane services, so a preset mounts this row over the deployment's
+ * own provider rather than starting one.
+ */
+export const inject = ['tools', 'finance']
+
+/** Default cooperative tool-call timeout budget, in milliseconds. */
+export const DEFAULT_FINANCE_TOOL_TIMEOUT_MS = 180_000
+
+/** Plugin config: the per-call budget the tool-call timeout policy enforces. */
+export interface Config {
+  /**
+   * Cooperative timeout budget attached to every finance tool. It must not be
+   * shorter than the provider's own invocation bound, or the tool-call policy
+   * would cancel a bridge process the provider still considers within budget.
+   * Defaults to 180000, the provider's default bound.
+   */
+  timeoutMs?: number
+}
+
+export const Config: z<Config> = z.object({
+  timeoutMs: z.number().step(1).min(1).default(DEFAULT_FINANCE_TOOL_TIMEOUT_MS),
+})
+
+/**
+ * Project one outcome into the canonical tool value: the operation's document,
+ * the data-source warnings the model must weigh, and the series its card draws.
+ * The warnings and the series are the two members a model must not read, so
+ * {@link renderFinanceDocument} is what decides the model-facing half.
+ * @param outcome - the seam's outcome for one invocation.
+ * @returns the canonical value the output schema validates.
+ */
+function toolValue(outcome: FinanceOutcome): Record<string, JsonValue> {
+  return {
+    ...outcome.document,
+    warnings: [...outcome.warnings],
+    // The payload is JSON by construction (the bridge encoded it, `readFinanceCharts`
+    // re-narrowed it shape by shape), and the output schema is an open object.
+    charts: outcome.charts as unknown as JsonValue,
+  }
+}
+
+/**
+ * Render one canonical finance value as model-facing text: the data-source
+ * warnings first, then the complete document as JSON. The document is emitted
+ * whole because the tools' value is in their numbers, and a hand-written
+ * summary would drop the dimension details the model reasons over.
+ *
+ * The series is the one member left out: it exists so a UI can draw the history
+ * the document summarizes away, and the model reads the analysis, not the bars.
+ * @param value - the canonical tool output value.
+ * @returns one text block.
+ */
+export function renderFinanceDocument(value: Record<string, JsonValue>): string {
+  const { warnings, charts: _series, ...document } = value
+  const parts: string[] = []
+  if (Array.isArray(warnings) && warnings.length > 0) {
+    parts.push(`Data warnings:\n${warnings.map(warning => `- ${renderWarning(warning)}`).join('\n')}`)
+  }
+  parts.push(`\`\`\`json\n${JSON.stringify(document, null, 2)}\n\`\`\``)
+  return parts.join('\n\n')
+}
+
+/**
+ * Publish one tool value's series as the call's presentation metadata, so a card
+ * can draw it on the live path and on a session-log replay alike.
+ * @param value - the canonical tool value.
+ * @returns the narrowed chart payload.
+ */
+function chartMeta(value: JsonValue): JsonValue {
+  // The output schema is an object and the value is validated against it before
+  // this projector runs, so what arrives here is what `toolValue` built.
+  const charts = (value as Record<string, JsonValue>)['charts']
+  return readFinanceCharts(charts) as unknown as JsonValue
+}
+
+/**
+ * Render one warning for the model. The bridge and the decoder both produce
+ * strings, so the non-string arm exists only because the canonical value's
+ * element type is `JsonValue`; JSON keeps such a value readable rather than
+ * rendering it as `[object Object]`.
+ * @param warning - one entry of the outcome's warnings array.
+ * @returns the warning text.
+ */
+function renderWarning(warning: JsonValue): string {
+  return typeof warning === 'string' ? warning : JSON.stringify(warning)
+}
+
+/** The shared open-object output spec: every finance document is one JSON object. */
+const DOCUMENT_SCHEMA = { type: 'object', additionalProperties: true } as const
+
+/**
+ * Register one index analysis tool: no arguments, one capability operation, and
+ * the series its card draws published as the call's presentation metadata.
+ * @param ctx - context whose `tools` registry receives the registration.
+ * @param finance - the capability instance the tool invokes.
+ * @param timeoutMs - per-tool wall-clock budget.
+ * @param name - the model-facing tool name.
+ * @param description - the model-facing description.
+ * @param operation - the capability operation the tool runs.
+ */
+function registerIndexTool(
+  ctx: Context,
+  finance: FinanceRuntime,
+  timeoutMs: number,
+  name: string,
+  description: string,
+  operation: 'csi300_analysis' | 'csi2000_analysis' | 'market_signal',
+): void {
+  ctx.tools.register(defineTool({
+    name,
+    description,
+    parameters: {},
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+      presentationMeta: (_args, value) => chartMeta(value),
+    },
+    timeoutMs,
+    async execute(_args, exec) {
+      return toolValue(await finance.invoke({ operation, arguments: {} }, exec.signal))
+    },
+  }))
+}
+
+/**
+ * Register the finance tools.
+ *
+ * Every tool is left at the registry's default exclusive scheduling: each
+ * invocation writes the analysis project's cache, so overlapping calls would
+ * race on those files.
+ * @param ctx - context whose `tools` registry receives the registrations.
+ * @param finance - the capability instance every tool invocation goes through.
+ * @param timeoutMs - per-tool wall-clock budget enforced by the tool-call timeout policy.
+ */
+export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, timeoutMs: number): void {
+  ctx.tools.register(defineTool({
+    name: 'market_data_refresh',
+    description: 'Refresh the cached A-share index, ETF, and macro datasets every other finance tool reads. The refresh is incremental: a cache written today is reused, so only stale series are downloaded. Call it before a first analysis or after a result reports stale data.',
+    parameters: {
+      force: { type: 'boolean', description: 'Download every series even when its cache is fresh. Defaults to false.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'refresh',
+        arguments: { ...args.force === undefined ? {} : { force: args.force } },
+      }, exec.signal))
+    },
+  }))
+
+  registerIndexTool(ctx, finance, timeoutMs, 'csi300_analysis', 'Score the CSI 300 (沪深300) on valuation, equity risk premium, drawdown, volume exhaustion, and volatility convergence, plus ERP-extreme and macro-bottom bonus dimensions. Returns the total score out of 100, the season and action labels, per-dimension detail, the latest close, the PE percentile, and whether the index is at an ice point (score at least 50).', 'csi300_analysis')
+
+  registerIndexTool(ctx, finance, timeoutMs, 'csi2000_analysis', 'Score the CSI 2000 (中证2000) on macro liquidity, trend momentum, relative strength against the CSI 300, market structure, macro-bottom confirmation, and margin-flush confirmation, then evaluate the three-channel buy signal (absolute score, five-year score percentile, r20 percentile, 250-day drawdown, and MA10 stabilization) with the position size it implies.', 'csi2000_analysis')
+
+  registerIndexTool(ctx, finance, timeoutMs, 'market_timing_signal', 'Compose the monthly timing signal over both indexes: ice-point buy flags, bubble or trend-breakdown sell legs with their reasons, the per-index action (BUY, HOLD, SELL, or RESTORE), and the overall position advice. Use it for the strategy\'s complete current stance rather than reading the two index scores separately.', 'market_signal')
+
+  ctx.tools.register(defineTool({
+    name: 'macro_snapshot',
+    description: 'Return the latest aligned macro row and recent history: USD/CNY and JPY/CNY, China and US bond yields with their spreads, gold, China CPI, PPI, PMI, M1, M2, social financing, retail sales, real estate, margin balance, new accounts, and the Fed rate. Also returns the CSI 300 PE/PB valuation and the 10-year treasury yield used by the equity risk premium dimension.',
+    parameters: {},
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+    },
+    timeoutMs,
+    async execute(_args, exec) {
+      return toolValue(await finance.invoke({ operation: 'macro_snapshot', arguments: {} }, exec.signal))
+    },
+  }))
+}
+
+/**
+ * Mount the finance tools over the deployment's `ctx.finance` provider.
+ * @param ctx - context carrying the tool registry and the capability.
+ * @param config - the per-call timeout budget.
+ */
+export function apply(ctx: Context, config: Config): void {
+  // schemastery (Config) has already filled every defaulted field.
+  registerFinanceTools(ctx, ctx.finance, (config as Required<Config>).timeoutMs)
+}

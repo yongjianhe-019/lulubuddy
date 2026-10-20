@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-10-20-workbuddy-0.2.1-migration.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-10-20-workbuddy-0.2.1-migration.md
+/agent-note-workbuddy-on-dsh-0-2-1:
+  en: a409f1a840af721d
+  zh: dbe5feb55c707e3c
+/agent-note-workbuddy-on-dsh-0-2-1/problem:
+  en: cf779c522625c917
+  zh: 78f09a1dc83f683e
+/agent-note-workbuddy-on-dsh-0-2-1/decision:
+  en: cb6d2f27e8b44182
+  zh: 1420763e8cb50931
+/agent-note-workbuddy-on-dsh-0-2-1/verification:
+  en: e65d1c029145a56d
+  zh: 852093be2ffe4203
+/agent-note-workbuddy-on-dsh-0-2-1/limitations:
+  en: 16c79d2c290f732f
+  zh: f670eac7addad770

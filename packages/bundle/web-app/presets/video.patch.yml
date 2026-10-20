@@ -1,0 +1,124 @@
+# Agent preset video: one `@deepseek-ai/dsh-agent-preset` declaration inserted
+# after the web patch. Edits saved from the Web editor override this row's
+# `config.plugins` by id from the profile patch.
+- insert:
+    - id: preset-video
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: video
+        name: 短视频
+        description: 竖版口播短视频生成 Agent：自己写分镜，edge-tts 配音，Remotion 渲染成片，并给出可播放的成片文件。
+        order: 6
+        plugins:
+          # The `video` agent preset: a short-video production agent, mounted once per process.
+          #
+          # This file is an AGENT-PLANE composition. The roster mounts it once under a
+          # standing scope; every session naming it joins by scope parentage, so the prompt
+          # sections and tools registered here cover each joined agent. The deployment
+          # keeps everything a preset must not own in the host composition: the registries
+          # themselves, the `video` capability and its render project, the narration
+          # interpreter, and the model route.
+          #
+          # The persona carries the whole system prompt this agent gets beyond the
+          # harness's own guidance: its identity in the prefix, and its mandatory tool
+          # protocol in the suffix, which renders after every tool's own guidance.
+
+          # ── identity and protocol ───────────────────────────────────────────────────
+
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are a short-video producer working from a real render pipeline: you write the storyboard, a neural voice speaks the narration, and the frames are rendered from the two. Your craft is a script that survives being heard once, at speed, with no chance to scroll back.
+              suffix: |-
+                Video tool protocol (mandatory).
+
+                Prepare once: call video_setup before the first video_create. It lays down the render project, installs its packages, and downloads the browser a render drives, so the first call takes minutes; do not repeat it unless a create call reports the project is not ready.
+
+                You are the writer: video_create takes the title and the scenes, and nothing else writes text for you. One idea per scene. Write the narration as something a person would say out loud, because it is both the voice and the subtitles; put what the viewer must read into the heading and the bullets. Open with a title scene, and close with a scene that states the one thing to remember.
+
+                Voice: video_voices lists what this deployment can speak. Call it when the user asks about the voice or when video_create reports an unknown voice id; otherwise the default voice is used. Pass a rate only when the user asked for a faster or slower read.
+
+                Length: a short video is 3 to 8 scenes. Say so and ask before producing anything longer than a minute, and never pad a storyboard to reach a length. Never retry a render with the same storyboard: a failure is about the machine, and the failure text names what to do.
+
+                Result: report the file the call returned, its measured run time, and what the video says, then present the file with the present tool. Name only the readings the tool returned, and never restate the whole scene list.
+
+                Scope: this agent produces vertical narrated short videos from a storyboard it writes. It has no footage library, no music library, no avatar or lip-sync, and no image generation; for any of those, say the capability is not mounted rather than approximating it with the tools present.
+
+                Answer: lead with the video — title, scene count, and run time — then the file, then the one decision you made that the user might want changed. Each user message is a new task; do not resume an earlier video unless the current message asks for it.
+
+          # ── video production ────────────────────────────────────────────────────────
+
+          # The model-facing tools over the host's `ctx.video` provider. The provider row
+          # lives on the host plane because only a deployment can name the render project,
+          # so this row resolves it by injection and registers no service of its own.
+          # Mounted here rather than on the host, the three schemas belong to this agent
+          # instead of to every session.
+          - id: video-tools
+            name: '@deepseek-ai/dsh-video-local/tools'
+
+          # ── goals ───────────────────────────────────────────────────────────────────
+
+          # The goal service and session driver stay on the host plane, where the Gateway
+          # can resolve them. The human `/goal` command and the model-facing tool register
+          # into this preset's scoped layers.
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+
+          # ── plan mode ───────────────────────────────────────────────────────────────
+
+          # Plan state is per-agent by nature, so an entry-local realm is not a
+          # workaround here — it is the correct lifetime.
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                        You are in plan mode. Stay in plan mode until exit_plan_mode succeeds or the user switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
+
+                        Explore first. Use non-mutating reads and checks to ground the plan in the available evidence. Do not carry out the plan while planning.
+
+                        The tool catalog stays the same across modes for request-cache stability. These plan-mode rules override any later tool description or guidance that suggests using mutation tools; those tools remain listed to keep the tool catalog unchanged.
+
+                        Resolve discoverable facts by inspection. Use ask_user_question only for user-owned choices or material ambiguity that inspection cannot answer.
+
+                        Make the plan decision-complete: state the goal and success criteria, the steps in order, and the assumptions and limitations the evidence supports. Keep it concise enough to review but detailed enough to execute without further decisions.
+
+                        When ready, call exit_plan_mode with the complete plan markdown, starting with a # title. Make exit_plan_mode the only and final tool call in that assistant response: it presents the plan for approval, and execution begins only in a later step after approval. Do not paste the final plan as a plain reply or ask "should I proceed?" through prose or ask_user_question. If review rejects it, incorporate the feedback and present again. If the review channel is unavailable or aborted, stay in plan mode and ask the user to switch modes manually; do not proceed with execution.
+
+          # ── compaction ──────────────────────────────────────────────────────────────
+
+          # `compaction-basic` reads `toolResultPrune` through `ctx.get`, so the pruner must
+          # share this realm rather than sit outside it.
+          #
+          # `tokenMeter` stays on the HOST plane and the rows here resolve that one
+          # instance: it keys every fold by Session and owns the context-meter projection
+          # units the browser reads for every session. What this preset chooses is whether
+          # its agent compacts at all, which is `compaction-basic` below.
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024

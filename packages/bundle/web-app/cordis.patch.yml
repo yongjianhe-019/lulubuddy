@@ -66,6 +66,34 @@
     - id: subagent-model-selection-settings
       name: '@deepseek-ai/dsh-tool-subagent/model-selection-settings'
 
+    # Financial-market analysis behind the 金融服务 agent preset. The provider
+    # row drives one external Python project, so no default can name it: the
+    # row stays disabled until a deployment supplies the two paths, either by
+    # exporting these variables or by overriding this row in a profile patch
+    # with literal values. A disabled row loads no config, so an unconfigured
+    # host is untouched rather than broken. The capabilities register on the
+    # host plane; a session's own agent preset mounts the model-facing tools.
+    - id: finance-local
+      name: '@deepseek-ai/dsh-finance-local'
+      disabled: !!js process.env.DSH_FINANCE_STOCK_MARKET_ROOT === undefined
+      config:
+        stockMarketPython: !!js process.env.DSH_FINANCE_STOCK_MARKET_PYTHON
+        stockMarketRoot: !!js process.env.DSH_FINANCE_STOCK_MARKET_ROOT
+
+    # Short-video production behind the 短视频 agent preset. The render project
+    # is materialized under the harness home the first time a session calls
+    # setup, and nothing is downloaded at load, so this row needs no deployment
+    # input; a deployment that keeps its project elsewhere overrides
+    # `projectRoot` here or in a profile patch.
+    - id: video-local
+      name: '@deepseek-ai/dsh-video-local'
+
+    # Xiaohongshu post packaging behind the 小红书创作 agent preset. The manual
+    # and asset directories have personal defaults; this row serves the finished
+    # video under /xhs-assets and registers no tool of its own.
+    - id: xhs-local
+      name: '@deepseek-ai/dsh-xhs-local'
+
     - id: message-feedback
       name: '@deepseek-ai/dsh-message-feedback'
       config:
@@ -422,6 +450,28 @@
     # sessions created later. Absent a roster it renders nothing.
     - id: ui-agent-preset
       name: '@deepseek-ai/dsh-client-ui-agent-preset'
+
+    # WorkBuddy's capability navigation, scenario tabs, and Ask/Plan/Craft
+    # posture control. These are the custom surfaces this fork keeps on top of
+    # the upstream agent-preset registry.
+    - id: ui-workbuddy-mode
+      name: '@deepseek-ai/dsh-client-ui-workbuddy-mode'
+
+    - id: ui-workbuddy-scenarios
+      name: '@deepseek-ai/dsh-client-ui-workbuddy-scenarios'
+
+    - id: ui-workbuddy-shell
+      name: '@deepseek-ai/dsh-client-ui-workbuddy-shell'
+
+    # Dedicated cards for the finance, short-video, and Xiaohongshu tools.
+    - id: ui-finance-view
+      name: '@deepseek-ai/dsh-client-ui-finance-view'
+
+    - id: ui-video-view
+      name: '@deepseek-ai/dsh-client-ui-video-view'
+
+    - id: ui-xhs-view
+      name: '@deepseek-ai/dsh-client-ui-xhs-view'
 
     - id: ui-settings-session-log
       name: '@deepseek-ai/dsh-client-ui-settings-session-log'

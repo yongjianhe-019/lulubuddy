@@ -1,0 +1,12 @@
+{
+  "operation": "setup",
+  "project_root": "/Users/hyj/.dsh/video",
+  "ready": true,
+  "laid_template": true,
+  "installed_packages": true,
+  "browser_ready": true,
+  "remotion_version": "4.0.529",
+  "edge_tts_version": "7.2.8",
+  "node_path": "/usr/local/Cellar/node/25.6.0/bin/node",
+  "tts_python": "/Users/hyj/.dsh/video/.venv/bin/python"
+}

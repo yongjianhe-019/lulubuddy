@@ -1,0 +1,527 @@
+/* Finance tool cards: score bars, the threshold gauge, KPI capsules, macro
+ * facts, and the refresh timeline. Every colour is a semantic alias token, so
+ * the WorkBuddy skin recolours these cards by rebinding tokens alone. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kpiRow,
+.factGrid,
+.macroRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kpi {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 9999px;
+  corner-shape: round;
+}
+
+.kpiLabel {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.kpiValue {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.sectionTitle {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.warningList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.warningItem {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-state-warn-label);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.table th,
+.table td {
+  padding: 3px 8px 3px 0;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l3);
+}
+
+.table th {
+  font-weight: 400;
+}
+
+.tableKey {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.tableValue {
+  color: var(--dsw-alias-label-primary);
+}
+
+.notice {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.raw {
+  margin: 0;
+  padding: 8px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-markdown-code-block);
+  font-family: var(--dsw-font-markdown-code-font-family);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.dimensions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dimension {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(96px, max-content) 1fr max-content;
+  align-items: center;
+  gap: 8px;
+}
+
+.barLabel {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.barTrack {
+  position: relative;
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 9999px;
+  corner-shape: round;
+  background: var(--dsw-alias-bg-layer-3);
+}
+
+.barFill {
+  display: block;
+  width: var(--finance-bar-fill, 0%);
+  height: 100%;
+  border-radius: 9999px;
+  corner-shape: round;
+  background: var(--dsw-alias-brand-primary);
+}
+
+.barValue {
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-primary);
+}
+
+.barNoScore {
+  grid-column: 2 / span 2;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-dimmed);
+}
+
+.dimensionDetails {
+  padding-left: 2px;
+}
+
+.dimensionSummary {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+}
+
+.gaugeWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.gauge {
+  width: 120px;
+  height: 64px;
+}
+
+.gaugeTrack {
+  fill: none;
+  stroke: var(--dsw-alias-border-l3);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.gaugeValue {
+  fill: none;
+  stroke: var(--dsw-alias-brand-primary);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.gaugeTick {
+  stroke: var(--dsw-alias-label-secondary);
+  stroke-width: 2;
+}
+
+.gaugeLabels {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.gaugeValueText {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-primary);
+}
+
+.gaugeThresholdText {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.legGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.leg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+}
+
+.legHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.legTitle {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.legFields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+}
+
+.legField {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.legFieldLabel {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.legFieldValue {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: right;
+  color: var(--dsw-alias-label-primary);
+}
+
+.reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reasonsLabel {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.advice {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timelineItem {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) 1fr max-content;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l3);
+}
+
+.timelineName {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.timelineMeta {
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.timelineDate {
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+/* Candlestick and trend panels. The candle tonality follows the A-share
+ * convention (红涨绿跌), so the two semantic state aliases are the tone source:
+ * they are the only red/green aliases the theme carries, and the skin leaves
+ * them rebindable like every other token. */
+.chartWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 8px;
+  border: 0.5px solid var(--dsw-alias-border-l3);
+  border-radius: 10px;
+}
+
+.chartHead,
+.trendHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chartTitle {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.chartRange,
+.trendReadout {
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.barUp {
+  --finance-bar-tone: var(--dsw-alias-state-error-primary);
+}
+
+.barDown {
+  --finance-bar-tone: var(--dsw-alias-state-success-primary);
+}
+
+.barWick {
+  stroke: var(--finance-bar-tone);
+  stroke-width: 1;
+}
+
+.barBody {
+  fill: var(--finance-bar-tone);
+}
+
+.barVolume {
+  fill: var(--dsw-alias-bg-layer-3);
+}
+
+.trendPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
+.trendLabel {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.trendSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.trendLine {
+  fill: none;
+  stroke: var(--dsw-alias-brand-primary);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* The percentile bars: the score-bar rows a valuation reading is compared on,
+ * plus the boundary the valuation dimension grades at. */
+.categoryBars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.barReference {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: var(--finance-bar-reference, 0%);
+  width: 1px;
+  background: var(--dsw-alias-label-secondary);
+}
+
+.categoryNote {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+/* The turn footer: the newest analysis under the answer, outside the process
+ * disclosure's fold. */
+.turnTail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.turnTailHead {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.turnTailCharts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 8px;
+}
