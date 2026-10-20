@@ -125,3 +125,12 @@
   background: var(--dsw-alias-interactive-bg-hover-accent);
   color: var(--dsw-alias-label-primary);
 }
+
+/* The Skin Center's generic composer-accessory rule paints the dock's direct
+ * child as one solid strip. This dock is a two-row selector, not a single
+ * accessory, so keep the scene background visible behind it. The selector
+ * repeats the skin scope and slot, and `.wrap` out-specifies the skin's `> *`. */
+html[data-dsh-skin] [data-phase='active'] [data-slot='conversation.input.dock'] > .wrap {
+  background: transparent !important;
+  background-image: none !important;
+}
