@@ -22,6 +22,13 @@ export type FinanceOperation =
   | 'csi2000_analysis'
   | 'market_signal'
   | 'macro_snapshot'
+  | 'dashboard'
+  | 'ice_check'
+  | 'opportunity_radar'
+  | 'dragon_head'
+  | 'positions'
+  | 'journal_append'
+  | 'strategy_doc'
 
 /** Each operation's arguments, keyed by operation. */
 export interface FinanceRequestMap {
@@ -35,6 +42,20 @@ export interface FinanceRequestMap {
   readonly market_signal: Record<string, never>
   /** Latest macro row, recent history, valuation, and bond yield. */
   readonly macro_snapshot: Record<string, never>
+  /** Full daily snapshot: core signals, satellite radar, dragon gate, and plan. */
+  readonly dashboard: { readonly force?: boolean; readonly record?: boolean }
+  /** CSI2000 ice-point gate: trigger, channel, position, and what is missing. */
+  readonly ice_check: { readonly force?: boolean }
+  /** Satellite ETF opportunity scan with R:R, conditional win rate, and EV. */
+  readonly opportunity_radar: { readonly force?: boolean }
+  /** Latest dragon-head post-close review and tracked candidates. */
+  readonly dragon_head: { readonly as_of?: string }
+  /** Human-maintained positions and satellite radar state. */
+  readonly positions: Record<string, never>
+  /** Append one entry to the core or satellite trade journal. */
+  readonly journal_append: { readonly kind?: 'core' | 'satellite'; readonly entry: string }
+  /** Read one whitelisted StockMarket strategy document. */
+  readonly strategy_doc: { readonly name?: 'mindset' | 'progress' | 'readme' }
 }
 
 /** One fully-specified capability request: an operation and its own arguments. */

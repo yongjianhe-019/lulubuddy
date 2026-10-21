@@ -20,6 +20,7 @@ import { MacroSnapshotView } from './MacroSnapshotView.tsx'
 import { MarketDataRefreshView } from './MarketDataRefreshView.tsx'
 import { MarketTimingView } from './MarketTimingView.tsx'
 import { FinanceTurnTail } from './FinanceTurnTail.tsx'
+import { DashboardView, DragonView, IceCheckView, PositionsView, RadarView } from './ExpandedViews.tsx'
 import { en, NS, zh, type FinanceViewKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -52,5 +53,10 @@ export function apply(ctx: ClientContext): void {
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'market_timing_signal', locale: NS }, MarketTimingView)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'macro_snapshot', locale: NS }, MacroSnapshotView)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'market_data_refresh', locale: NS }, MarketDataRefreshView)
+    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'market_dashboard', locale: NS }, DashboardView)
+    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'csi2000_ice_check', locale: NS }, IceCheckView)
+    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'opportunity_radar', locale: NS }, RadarView)
+    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'dragon_head', locale: NS }, DragonView)
+    yield ctx.slots.register({ name: 'tool.call.toolview', key: 'positions_snapshot', locale: NS }, PositionsView)
   })
 }

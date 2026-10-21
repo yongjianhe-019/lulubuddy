@@ -1,5 +1,5 @@
 ---
-description: "Dedicated Web cards for the five finance analysis tools: a KPI row, per-dimension score bars, an ice-point threshold gauge, macro facts, timing signals, and a refresh timeline."
+description: "Dedicated Web cards for the ten finance analysis tools: a KPI row, per-dimension score bars, an ice-point threshold gauge, macro facts, timing signals, and a refresh timeline."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Render the five finance analysis tool results as purpose-built cards instead of a raw JSON code block. Each card is registered into ui-tool's keyed `tool.call.toolview` seat under its own wire tool name, decodes the tool's own document shape, and falls back to the result text when the document is unrecognized. The cards use semantic `--dsw-alias-*` tokens and CSS Modules only, so the WorkBuddy skin recolors them without a component change.
+Render the ten finance analysis tool results as purpose-built cards instead of a raw JSON code block. Each card is registered into ui-tool's keyed `tool.call.toolview` seat under its own wire tool name, decodes the tool's own document shape, and falls back to the result text when the document is unrecognized. The cards use semantic `--dsw-alias-*` tokens and CSS Modules only, so the WorkBuddy skin recolors them without a component change.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ Render the five finance analysis tool results as purpose-built cards instead of 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount this plugin alongside `ui-tool`. The five finance tools then render as their own cards wherever the conversation shows a call:
+Mount this plugin alongside `ui-tool`. The ten finance tools then render as their own cards wherever the conversation shows a call:
 
 | Tool | The card shows |
 |---|---|
@@ -34,6 +34,11 @@ Mount this plugin alongside `ui-tool`. The five finance tools then render as the
 | `market_timing_signal` | Both index scores, one signal card per index, and the position advice |
 | `macro_snapshot` | A KPI grid of the latest macro facts with their dates, plus valuation and bond-yield rows |
 | `market_data_refresh` | The refresh mode, each dataset's rows and date range, and the cache files newest first |
+| `market_dashboard` | The composed daily conclusion, core rows, opportunities, dragon gate, plan, and warnings |
+| `csi2000_ice_check` | The buy-gate state, close/MA10, score percentiles, channel, gaps, and condition detail |
+| `opportunity_radar` | Satellite opportunities with R:R, win rate, EV, and missing conditions |
+| `dragon_head` | Environment, sentiment, sector limit-up structure, and the final flag |
+| `positions_snapshot` | Open and closed positions with the as-of date |
 
 A tool the composition does not register stays on the generic tool row, so an uncomposed row is the off switch.
 
@@ -48,7 +53,7 @@ Every value comes from the tool result text, which carries the document as one f
 
 [`model.ts`](src/client/model.ts) owns the whole untrusted-input boundary: it narrows every JSON value, decodes the fenced document, parses each dimension's parenthesized maximum (`估值温度(30)`, `ERP极端信号(+15)`), and derives one view model per tool. The view returns `null` for anything it cannot recognize, and the card renders [`PlainResult`](src/client/parts.tsx) instead.
 
-[`charts.tsx`](src/client/charts.tsx) holds the two hand-written shapes: a linear score bar exposing `role="progressbar"` with its real score and maximum, and a semicircular threshold gauge with its threshold tick. [`parts.tsx`](src/client/parts.tsx) holds the card shell, KPI capsules, warning list, field table, and fallback. The four view modules render the five cards: one shared index-score renderer under the two index keys, one timing card, one macro card, and one refresh card.
+[`charts.tsx`](src/client/charts.tsx) holds the two hand-written shapes: a linear score bar exposing `role="progressbar"` with its real score and maximum, and a semicircular threshold gauge with its threshold tick. [`parts.tsx`](src/client/parts.tsx) holds the card shell, KPI capsules, warning list, field table, and fallback. The five view modules render the ten cards: one shared index-score renderer under the two index keys, one timing card, one macro card, and one refresh card.
 
 ### The registration
 
@@ -83,7 +88,7 @@ No invalidation. The package adds no request content and no session event.
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **The cards are fixed renderers, not a widget language.** Each of the five tools has one hand-written component; a new finance tool, or a combination of views no card predefines, needs a new component and a new registration rather than a composed descriptor.
+- **The cards are fixed renderers, not a widget language.** Each of the ten tools has one hand-written component; a new finance tool, or a combination of views no card predefines, needs a new component and a new registration rather than a composed descriptor.
 - **An unrecognized document shows the raw text.** The fallback is the result text, not a partial card, because the package makes no claim about a shape it does not know; a document whose fields all disappear renders only what survived.
 - **The macro fact labels cover the keys the analysis project publishes today.** An unfamiliar macro key renders verbatim, so a new macro series reads as its snake_case name until a dictionary key is added.
 - **Cursor pagination that leaves the call outside the runtime window has no tool identity**, so a result-only history page falls to ui-tool's generic row.

@@ -208,14 +208,21 @@ describe('finance-local provider config', () => {
     expect(ctx.tools.schemas()).toEqual([])
   })
 
-  it('registers the five model-facing tools from the tools entry', async () => {
+  it('registers the expanded StockMarket tools from the tools entry', async () => {
     const { ctx } = await boot()
     expect(ctx.tools.schemas().map(schema => schema.name).sort()).toEqual([
       'csi2000_analysis',
+      'csi2000_ice_check',
       'csi300_analysis',
+      'dragon_head',
+      'journal_append',
       'macro_snapshot',
+      'market_dashboard',
       'market_data_refresh',
       'market_timing_signal',
+      'opportunity_radar',
+      'positions_snapshot',
+      'strategy_doc',
     ])
   })
 

@@ -182,6 +182,143 @@ export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, time
   registerIndexTool(ctx, finance, timeoutMs, 'market_timing_signal', 'Compose the monthly timing signal over both indexes: ice-point buy flags, bubble or trend-breakdown sell legs with their reasons, the per-index action (BUY, HOLD, SELL, or RESTORE), and the overall position advice. Use it for the strategy\'s complete current stance rather than reading the two index scores separately.', 'market_signal')
 
   ctx.tools.register(defineTool({
+    name: 'market_dashboard',
+    description: 'Build the project\'s full daily snapshot in one call: the core CSI 300 and CSI 2000 actions, the next trigger, the satellite opportunity radar, the dragon-head gate, the human-maintained positions, the current plan, and any degraded data panels. Use this for a daily review or any question that spans several engines. Set record to true only when the user wants the project\'s daily journal and machine-readable record written.',
+    parameters: {
+      force: { type: 'boolean', description: 'Refetch every series instead of reusing today\'s cache. Defaults to false.' },
+      record: { type: 'boolean', description: 'Write the project\'s daily journal and machine-readable record. Defaults to false; ask before writing.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+      presentationMeta: (_args, value) => chartMeta(value),
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'dashboard',
+        arguments: {
+          ...args.force === undefined ? {} : { force: args.force },
+          ...args.record === undefined ? {} : { record: args.record },
+        },
+      }, exec.signal))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'csi2000_ice_check',
+    description: 'Answer the one question the trading brief asks before every market analysis: is the CSI 2000 buy gate open, and if not, which condition is missing? Returns the ETF close, MA10, the three-channel verdict, the position size, the per-condition detail, and the gaps to the trigger. Call this whenever the user asks about timing, buying, or the market stance.',
+    parameters: {
+      force: { type: 'boolean', description: 'Refetch every series instead of reusing today\'s cache. Defaults to false.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'ice_check',
+        arguments: { ...args.force === undefined ? {} : { force: args.force } },
+      }, exec.signal))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'opportunity_radar',
+    description: 'Scan the satellite ETF pool for the project\'s opportunity layer: R:R, conditional win rate with its Wilson lower bound, EV, suggested position, and the exact conditions a candidate is missing. Also returns the watching list, exits, open satellite positions, and factor-window status. Use it for sector or satellite-ETF questions.',
+    parameters: {
+      force: { type: 'boolean', description: 'Refetch every series instead of reusing today\'s cache. Defaults to false.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'opportunity_radar',
+        arguments: { ...args.force === undefined ? {} : { force: args.force } },
+      }, exec.signal))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'dragon_head',
+    description: 'Return the latest post-close dragon-head review: the market environment, limit-up sentiment, sector limit-up structure, the final flag, and the tracked candidate ledger. This is a read of the project\'s own review output, not a live scan. Use it for 龙头, 板块, 连板, 情绪, or candidate-pool questions.',
+    parameters: {
+      as_of: { type: 'string', description: 'Optional YYYY-MM-DD review date. Defaults to the newest daily review.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'dragon_head',
+        arguments: { ...args.as_of === undefined ? {} : { as_of: args.as_of } },
+      }, exec.signal))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'positions_snapshot',
+    description: 'Read the human-maintained positions file and the satellite radar state. Call it before any advice that depends on what is held: a cleared position must not receive a trim recommendation, and a new buy is only suggested when the gate opens.',
+    parameters: {},
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+    },
+    timeoutMs,
+    async execute(_args, exec) {
+      return toolValue(await finance.invoke({ operation: 'positions', arguments: {} }, exec.signal))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'journal_append',
+    description: 'Append one analysis entry to the project\'s trade journal. Use kind core for the 沪深300/中证2000 decision journal and satellite for the other-fund journal. Write the entry in the project\'s required format: snapshot, model conclusion, gaps to the trigger, and the operation plan with prices, position, and invalidation. This writes a local file; do it after the analysis, not before.',
+    parameters: {
+      kind: { type: 'string', enum: ['core', 'satellite'], description: 'Journal to append to. Defaults to core.' },
+      entry: { type: 'string', required: true, description: 'Markdown entry to append. Must not be empty.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'journal_append',
+        arguments: {
+          ...args.kind === undefined ? {} : { kind: args.kind },
+          entry: args.entry,
+        },
+      }, exec.signal))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'strategy_doc',
+    description: 'Read one whitelisted StockMarket strategy document: mindset (the scenario-to-mindset map), progress (the model iteration log), or readme (the project overview). Use mindset as an annotation layer only; it never changes a model signal or produces a trade.',
+    parameters: {
+      name: { type: 'string', enum: ['mindset', 'progress', 'readme'], description: 'Document to read. Defaults to mindset.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'strategy_doc',
+        arguments: { ...args.name === undefined ? {} : { name: args.name } },
+      }, exec.signal))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
     name: 'macro_snapshot',
     description: 'Return the latest aligned macro row and recent history: USD/CNY and JPY/CNY, China and US bond yields with their spreads, gold, China CPI, PPI, PMI, M1, M2, social financing, retail sales, real estate, margin balance, new accounts, and the Fed rate. Also returns the CSI 300 PE/PB valuation and the 10-year treasury yield used by the equity risk premium dimension.',
     parameters: {},

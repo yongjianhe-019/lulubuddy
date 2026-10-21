@@ -34,6 +34,11 @@ kind: "package-reference"
 | `market_timing_signal` | 两个指数的得分、每个指数一张信号卡，以及仓位建议 |
 | `macro_snapshot` | 最新宏观事实的 KPI 网格及其日期，外加估值与国债收益率行 |
 | `market_data_refresh` | 刷新模式、每个数据集的行数与日期区间，以及按最新排序的缓存文件 |
+| `market_dashboard` | 组合日报的结论、核心行、机会、龙头闸门、计划与告警 |
+| `csi2000_ice_check` | 买入闸门状态、收盘/MA10、分数分位、通道、缺口与条件明细 |
+| `opportunity_radar` | 卫星机会的 R:R、胜率、EV 与缺失条件 |
+| `dragon_head` | 环境、情绪、板块涨停结构与收盘标记 |
+| `positions_snapshot` | 持仓与已平仓，以及截至日期 |
 
 组合未注册的工具仍留在通用工具行上，因此未组合该行就是关闭开关。
 

@@ -8,6 +8,7 @@ import { describe, expect, it, onTestFinished } from 'vitest'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import { apply, inject } from '../src/client/index.ts'
 import { FinanceTurnTail } from '../src/client/FinanceTurnTail.tsx'
+import { DashboardView, DragonView, IceCheckView, PositionsView, RadarView } from '../src/client/ExpandedViews.tsx'
 import { Csi2000AnalysisView, Csi300AnalysisView } from '../src/client/IndexAnalysisView.tsx'
 import { MacroSnapshotView } from '../src/client/MacroSnapshotView.tsx'
 import { MarketDataRefreshView } from '../src/client/MarketDataRefreshView.tsx'
@@ -28,7 +29,7 @@ function providePresentation(ctx: Context): PresentationCapture {
     name: 'root',
     children: {
       'tool.call.toolview': { kind: 'keyed', scope: 'session' },
-      'conversation.chat.turnTail': { kind: 'chain', scope: 'session' },
+      'conversation.chat.turnTail': { kind: 'list', scope: 'session' },
     },
   } as never, () => null)
   const capture: PresentationCapture = {
@@ -69,9 +70,15 @@ describe('finance view registration', () => {
       'market_timing_signal',
       'macro_snapshot',
       'market_data_refresh',
+      'market_dashboard',
+      'csi2000_ice_check',
+      'opportunity_radar',
+      'dragon_head',
+      'positions_snapshot',
     ])
     expect(entries.map(entry => entry.component)).toEqual([
       Csi300AnalysisView, Csi2000AnalysisView, MarketTimingView, MacroSnapshotView, MarketDataRefreshView,
+      DashboardView, IceCheckView, RadarView, DragonView, PositionsView,
     ])
     for (const entry of entries) expect(entry.locale).toBe('finance')
     expect(presentation.dictionaries).toHaveLength(1)
@@ -85,15 +92,11 @@ describe('finance view registration', () => {
     expect(entries).toHaveLength(1)
     expect(entries[0]?.component).toBe(FinanceTurnTail)
     expect(entries[0]?.locale).toBe('finance')
-    // A chain entry claims the owners it renders for; this one claims each
-    // closing turn and decides in the body whether it has charts to draw.
-    const owner = { turn: { turn: 4 }, seq: 12, openFile: () => {} }
-    expect(entries[0]?.select?.(owner as never)).toBe(owner)
   })
 
   it('removes every registration on disposal (HMR safety)', async () => {
     const { presentation, fiber } = await bench()
-    expect(presentation.slots.entries('tool.call.toolview')).toHaveLength(5)
+    expect(presentation.slots.entries('tool.call.toolview')).toHaveLength(10)
     expect(presentation.slots.entries('conversation.chat.turnTail')).toHaveLength(1)
     await fiber.dispose()
     expect(presentation.slots.entries('tool.call.toolview')).toHaveLength(0)

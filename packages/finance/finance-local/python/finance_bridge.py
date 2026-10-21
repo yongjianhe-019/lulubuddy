@@ -468,12 +468,217 @@ def op_macro_snapshot(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[s
     return document, warnings, _charts([])
 
 
+def _latest_dragon(asof: str | None) -> tuple[dict[str, Any], list[str]]:
+    """Read the newest dragon-head daily review, optionally for one date."""
+    import json as _json
+    daily_dir = Path(_stock_market_root()) / "dragon_head" / "data" / "daily"
+    if asof:
+        path = daily_dir / f"{asof}.json"
+        if not path.is_file():
+            return {"available": False, "reason": f"no dragon review for {asof}"}, []
+    else:
+        files = sorted(daily_dir.glob("*.json"))
+        if not files:
+            return {"available": False, "reason": "no dragon review files"}, []
+        path = files[-1]
+    try:
+        payload = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as error:  # noqa: BLE001 - a damaged daily file is reported, not hidden
+        return {"available": False, "reason": f"unreadable dragon review: {error}"}, []
+    return {"available": True, "file": str(path), **_jsonable(payload)}, []
+
+
+def op_dashboard(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Build the full daily snapshot: core signals, satellite radar, dragon gate, plan."""
+    import dashboard
+    from data.fetcher import patch_csi2000_index
+    from models.opportunity_entry import scan as scan_opp
+    from models.opportunity_radar import radar_scan
+    from strategy import generate_signal
+
+    data, macro = _market_data(force=bool(arguments.get("force")))
+    ratio = patch_csi2000_index(data)
+    signal = generate_signal(data, macro)
+    opp = scan_opp(data)
+    radar = radar_scan()
+    snapshot = dashboard.build_snapshot(data, macro, signal, opp, radar)
+    document = {"ratio": _jsonable(ratio), **snapshot}
+    warnings = _data_warnings(data)
+    if arguments.get("record"):
+        try:
+            jp, mp = dashboard.report.write_daily(snapshot)
+            document["record"] = {"journal": str(jp), "machine": str(mp)}
+        except Exception as error:  # noqa: BLE001 - recording is optional, analysis still valid
+            warnings.append(f"daily record write failed: {error}")
+    charts = _charts([
+        _price_series(data["csi2000_daily"], "price_csi2000"),
+        _comparison_series({"csi300": data["csi300_daily"], "csi2000": data["csi2000_daily"]}),
+    ])
+    return document, warnings, charts
+
+
+def op_ice_check(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Answer the one question the trading brief asks before every analysis: is CSI2000 buyable, and what is missing?"""
+    from data.fetcher import patch_csi2000_index
+    from models.csi2000 import csi2000_buy_channel, compute_csi2000_score
+
+    data, macro = _market_data(force=bool(arguments.get("force")))
+    ratio = patch_csi2000_index(data)
+    daily = data["csi2000_daily"].sort_values("date").reset_index(drop=True)
+    etf = data["etf_159531"].sort_values("date").reset_index(drop=True)
+    date_value = daily["date"].iloc[-1]
+    px = float(etf["close"].iloc[-1])
+    overlap = daily.merge(etf[["date", "close"]].rename(columns={"close": "etf_close"}), on="date", how="inner")
+    fx = float((overlap["etf_close"] / overlap["close"]).tail(10).mean()) if not overlap.empty else 1.0
+    ma10 = float(daily["close"].tail(10).mean()) * fx
+    score = compute_csi2000_score(
+        daily=daily,
+        valuation=data.get("csi2000_valuation"),
+        csi300_daily=data["csi300_daily"],
+        macro=macro,
+    )
+    channel = csi2000_buy_channel(
+        daily=daily,
+        csi300_daily=data["csi300_daily"],
+        macro=macro,
+        latest_date=score["signal_date"],
+        current_score=score["total_score"],
+    )
+    detail = channel.get("detail") or {}
+    above = detail.get("站回MA10") == "✅"
+    r20_pct = channel.get("r20_pct")
+    dd250 = channel.get("dd250")
+    gaps: list[str] = []
+    if not above:
+        gaps.append("站回MA10")
+    if r20_pct is not None and r20_pct > 0.10:
+        gaps.append("r20分位")
+    if dd250 is not None and dd250 >= -0.10:
+        gaps.append("回撤深度")
+    document = {
+        "as_of": _jsonable(date_value),
+        "etf_close": px,
+        "ma10": ma10,
+        "distance_to_ma10": px / ma10 - 1 if ma10 else None,
+        "ratio": _jsonable(ratio),
+        "score": channel.get("score", score.get("total_score")),
+        "score_pct": channel.get("score_pct"),
+        "r20_pct": r20_pct,
+        "dd250": dd250,
+        "triggered": channel.get("channel") is not None,
+        "channel": channel.get("channel"),
+        "position_pct": channel.get("position_pct"),
+        "detail": _jsonable(detail),
+        "gaps": gaps,
+        "check_2000_ice": True,
+    }
+    return document, _data_warnings(data), _charts([])
+
+
+def op_opportunity_radar(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Scan the satellite ETF pool for R:R / conditional win-rate / EV opportunities."""
+    from models.opportunity_entry import missing_reasons, prep, scan as scan_opp
+    from models.opportunity_radar import radar_scan
+
+    data, macro = _market_data(force=bool(arguments.get("force")))
+    _ = macro
+    opportunities = scan_opp(data)
+    radar = radar_scan()
+    rows = []
+    for entry in opportunities:
+        missing = []
+        try:
+            ma20 = float(prep(data[entry["code"]]).iloc[-1]["ma20"])
+            missing = missing_reasons(entry, ma20)
+        except Exception:  # noqa: BLE001 - one unreadable series must not hide the others
+            pass
+        rows.append({**_jsonable(entry), "missing": missing})
+    document = {
+        "opportunities": rows,
+        "watching": _jsonable(radar.get("watching") or []),
+        "exits": _jsonable(radar.get("exits") or []),
+        "positions": _jsonable(radar.get("positions") or []),
+        "factor_status": _jsonable(radar.get("factor_status") or {}),
+    }
+    return document, _data_warnings(data), _charts([])
+
+
+def op_dragon_head(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Return the latest post-close dragon-head review and the tracked candidates."""
+    document, warnings = _latest_dragon(arguments.get("as_of"))
+    track_path = _stock_market_root() / "dragon_head" / "data" / "dragon_track.csv"
+    if track_path.is_file():
+        try:
+            import pandas as pd
+            frame = pd.read_csv(track_path)
+            document["track"] = _jsonable(frame.tail(20).to_dict(orient="records"))
+        except Exception as error:  # noqa: BLE001 - the review remains useful without the ledger
+            warnings.append(f"dragon track unavailable: {error}")
+    return document, warnings, _charts([])
+
+
+def op_positions(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Read the human-maintained positions and the satellite radar state."""
+    del arguments
+    root = _stock_market_root()
+    import json as _json
+    positions = {}
+    for name in ("positions.json", "radar_state.json"):
+        path = root / "data" / name
+        try:
+            positions[name] = _json.loads(path.read_text(encoding="utf-8"))
+        except Exception as error:  # noqa: BLE001 - report a missing file, never invent holdings
+            positions[name] = {"error": str(error)}
+    return {"root": str(root), "files": positions}, [], _charts([])
+
+
+def op_journal_append(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Append one analysis entry to the core or satellite trade journal."""
+    kind = arguments.get("kind", "core")
+    entry = str(arguments.get("entry", "")).strip()
+    if kind not in ("core", "satellite"):
+        raise RuntimeError("journal kind must be core or satellite")
+    if not entry:
+        raise RuntimeError("journal entry must not be empty")
+    path = _stock_market_root() / "journal" / ("trade-journal.md" if kind == "core" else "satellite-trade-journal.md")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    prefix = f"\n\n## {datetime.now().strftime('%Y-%m-%d %H:%M')} 分析记录\n\n"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(prefix + entry.rstrip() + "\n")
+    return {"kind": kind, "path": str(path), "appended": True}, [], _charts([])
+
+
+def op_strategy_doc(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Read one whitelisted StockMarket strategy document for the mindset layer."""
+    names = {
+        "mindset": "strategy/03-交易心法.md",
+        "progress": "strategy/00-project-progress.md",
+        "readme": "README.md",
+    }
+    name = arguments.get("name", "mindset")
+    if name not in names:
+        raise RuntimeError("strategy doc name must be mindset, progress, or readme")
+    path = _stock_market_root() / names[name]
+    try:
+        text = path.read_text(encoding="utf-8")
+    except Exception as error:  # noqa: BLE001 - a missing document is a warning, not a fake answer
+        return {"name": name, "path": str(path), "text": ""}, [f"strategy document unavailable: {error}"], _charts([])
+    return {"name": name, "path": str(path), "text": text}, [], _charts([])
+
+
 OPERATIONS: dict[str, Callable[[dict[str, Any]], tuple[dict[str, Any], list[str], dict[str, Any]]]] = {
     "refresh": op_refresh,
     "csi300_analysis": op_csi300_analysis,
     "csi2000_analysis": op_csi2000_analysis,
     "market_signal": op_market_signal,
     "macro_snapshot": op_macro_snapshot,
+    "dashboard": op_dashboard,
+    "ice_check": op_ice_check,
+    "opportunity_radar": op_opportunity_radar,
+    "dragon_head": op_dragon_head,
+    "positions": op_positions,
+    "journal_append": op_journal_append,
+    "strategy_doc": op_strategy_doc,
 }
 
 
