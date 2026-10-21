@@ -502,7 +502,8 @@ def op_dashboard(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], 
     opp = scan_opp(data)
     radar = radar_scan()
     snapshot = dashboard.build_snapshot(data, macro, signal, opp, radar)
-    document = {"ratio": _jsonable(ratio), **snapshot}
+    report_markdown = dashboard.report.render_markdown(snapshot)
+    document = {"ratio": _jsonable(ratio), **snapshot, "report_markdown": report_markdown}
     warnings = _data_warnings(data)
     if arguments.get("record"):
         try:

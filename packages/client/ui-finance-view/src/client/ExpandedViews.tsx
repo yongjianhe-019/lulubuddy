@@ -78,6 +78,7 @@ export function DashboardView({ block, t }: FinanceViewProps) {
   const opportunities = list(document['opportunity'])
   const plan = list(document['plan'])
   const date = text(document['date'])
+  const report = text(document['report_markdown'])
   return (
     <Card title={t('card.dashboard')}>
       <WarningList warnings={parsed.warnings} t={t} />
@@ -133,6 +134,9 @@ export function DashboardView({ block, t }: FinanceViewProps) {
             <Kpi label={t('dashboard.sectors')} value={list(dragon['sectors']).slice(0, 3).map(item => text(asRecord(item)?.['sector']) ?? '').filter(Boolean).join(' / ') || '—'} />
           </div>
         )}
+      </Section>
+      <Section title={t('dashboard.report')}>
+        {report === null ? null : <pre className={css.report}>{report}</pre>}
       </Section>
       <Section title={t('dashboard.plan')}>
         <table className={css.table}>

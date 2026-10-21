@@ -190,7 +190,16 @@ export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, time
     },
     output: {
       schema: DOCUMENT_SCHEMA,
-      render: (_args, value) => [{ type: 'text', text: renderFinanceDocument(value) }],
+      render: (_args, value) => {
+        const document = value as Record<string, JsonValue>
+        const report = document['report_markdown']
+        if (typeof report !== 'string') return [{ type: 'text', text: renderFinanceDocument(value) }]
+        const warnings = Array.isArray(document['warnings'])
+          ? document['warnings'].filter((warning): warning is string => typeof warning === 'string')
+          : []
+        const prefix = warnings.length === 0 ? '' : `Data warnings:\n${warnings.map(warning => `- ${warning}`).join('\n')}\n\n`
+        return [{ type: 'text', text: `${prefix}${report}` }]
+      },
       presentationMeta: (_args, value) => chartMeta(value),
     },
     timeoutMs,

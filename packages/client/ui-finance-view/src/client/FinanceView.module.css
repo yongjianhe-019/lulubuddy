@@ -525,3 +525,22 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 8px;
 }
+
+
+/* The project's own human-readable Markdown report, shown verbatim inside the
+ * dashboard card; it is the same text the project writes to journal/daily. */
+.report {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-3);
+  color: var(--dsw-alias-label-secondary);
+  font-family: var(--dsw-font-markdown-code-font-family, monospace);
+  font-size: 12px;
+  line-height: 19px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-height: 420px;
+  overflow: auto;
+}
