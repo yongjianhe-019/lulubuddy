@@ -856,8 +856,8 @@ else process.exit(1);
     await expect.poll(() => settings.getByRole('switch', { name: 'Show coding view' }).getAttribute('aria-checked')).toBe('true')
     await successShot(page, 'developer-tools-setting')
     await settings.getByRole('button', { name: 'Close', exact: true }).click()
-    await expect.poll(() => iframe.getAttribute('sandbox')).toBe('allow-scripts')
-    expect(await iframe.getAttribute('sandbox')).toBe('allow-scripts')
+    await expect.poll(() => iframe.getAttribute('sandbox')).toBe('allow-scripts allow-downloads')
+    expect(await iframe.getAttribute('sandbox')).toBe('allow-scripts allow-downloads')
     expect(await iframe.evaluate((node) => {
       const host = node.closest('[data-textpreview-body]')
       if (!(host instanceof HTMLElement)) throw new Error('HTML preview body is unavailable')
@@ -896,7 +896,7 @@ else process.exit(1);
     await expect.poll(() => iframe.getAttribute('sandbox')).toBe('')
     expect(await page.getByText('LIGHTHOUSE', { exact: true }).count()).toBeGreaterThan(0)
     await scaffold.ctx.settings.update('ui-settings', { enabled: true })
-    await expect.poll(() => iframe.getAttribute('sandbox')).toBe('allow-scripts')
+    await expect.poll(() => iframe.getAttribute('sandbox')).toBe('allow-scripts allow-downloads')
     await expect.poll(() => html.locator('#result').innerText()).toBe('INLINE_OK')
     await successShot(page, 'html')
     sections.push([

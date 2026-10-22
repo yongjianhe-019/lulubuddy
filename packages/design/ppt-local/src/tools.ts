@@ -128,9 +128,9 @@ function renderResult(value: Record<string, JsonValue>): string {
   const lines = [
     `PPT: ${String(value['title'] ?? '')}`,
     `slides: ${String(value['slideCount'] ?? '')}`,
-    `html: ${String(value['htmlPath'] ?? '')}`,
+    `preview: [预览 HTML](${String(value['htmlPath'] ?? '')})`,
     ...(typeof value['pptxPath'] === 'string' ? [`pptx: ${value['pptxPath']}`] : []),
-    ...(typeof value['pptxUrl'] === 'string' ? [`download: ${value['pptxUrl']}`] : []),
+    ...(typeof value['pptxUrl'] === 'string' ? [`download: [下载 PPTX](${value['pptxUrl']})`] : []),
     ...(warnings.length === 0 ? [] : ['warnings:', ...warnings.map(item => `- ${String(item)}`)]),
   ]
   return lines.join('\n')
@@ -213,11 +213,14 @@ export function registerPptTools(ctx: import('@deepseek-ai/cordis').Context): vo
       let exported: Awaited<ReturnType<typeof exportDeck>> | undefined
       if (args.export !== false) {
         try {
-          exported = await exportDeck(htmlPath, join(outputDir, `${slug}.pptx`), DEFAULT_WIDTH, DEFAULT_HEIGHT, notesOf(spec), exec.signal)
+          exported = await exportDeck(htmlPath, join(outputDir, 'index.pptx'), DEFAULT_WIDTH, DEFAULT_HEIGHT, notesOf(spec), exec.signal)
         } catch (error) {
           warnings.push(error instanceof Error ? error.message : String(error))
         }
       }
+      const pptxUrl = exported === undefined
+        ? undefined
+        : `/api/file?path=${encodeURIComponent(exported.pptxPath)}&download=1`
       const value: PptToolValue = {
         title: spec.title,
         htmlPath,
@@ -226,7 +229,7 @@ export function registerPptTools(ctx: import('@deepseek-ai/cordis').Context): vo
         slideCount: spec.slides.length,
         ...exported === undefined ? {} : {
           pptxPath: exported.pptxPath,
-          pptxUrl: `/api/file?path=${encodeURIComponent(exported.pptxPath)}&download=1`,
+          ...(pptxUrl === undefined ? {} : { pptxUrl }),
           bytes: exported.bytes,
         },
         warnings,
@@ -258,12 +261,13 @@ export function registerPptTools(ctx: import('@deepseek-ai/cordis').Context): vo
       const title = deck?.title ?? basename(dirname(htmlPath))
       const exported = await exportDeck(
         htmlPath,
-        args.outputPath === undefined ? undefined : resolve(cwd, args.outputPath),
+        args.outputPath === undefined ? join(dirname(htmlPath), 'index.pptx') : resolve(cwd, args.outputPath),
         args.width ?? DEFAULT_WIDTH,
         args.height ?? DEFAULT_HEIGHT,
         notesOf(deck),
         exec.signal,
       )
+      const pptxUrl = `/api/file?path=${encodeURIComponent(exported.pptxPath)}&download=1`
       const info = await stat(exported.pptxPath)
       const value: PptToolValue = {
         title,
@@ -271,7 +275,7 @@ export function registerPptTools(ctx: import('@deepseek-ai/cordis').Context): vo
         ...sessionId === undefined ? {} : { htmlAddress: fileAddressFor(sessionId, cwd, htmlPath) },
         deckPath: join(dirname(htmlPath), 'deck.json'),
         pptxPath: exported.pptxPath,
-        pptxUrl: `/api/file?path=${encodeURIComponent(exported.pptxPath)}&download=1`,
+        pptxUrl,
         slideCount: exported.slideCount,
         bytes: info.size,
         warnings: [],

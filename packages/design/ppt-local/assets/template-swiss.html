@@ -551,8 +551,8 @@
   body.dark-bg #nav .dot.active{background:var(--accent)}
 
   #hint{position:fixed;bottom:2.4vh;right:2.5vw;z-index:30;display:flex;align-items:center;gap:.65em;font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.4}
-  #hint button{all:unset;display:inline-flex;align-items:center;gap:.42em;cursor:pointer;color:inherit;white-space:nowrap}
-  #hint button:hover,#hint button:focus-visible{opacity:1;text-decoration:underline;text-underline-offset:.3em}
+  #hint button,#hint a{all:unset;display:inline-flex;align-items:center;gap:.42em;cursor:pointer;color:inherit;white-space:nowrap}
+  #hint button:hover,#hint button:focus-visible,#hint a:hover,#hint a:focus-visible{opacity:1;text-decoration:underline;text-underline-offset:.3em}
   #hint .ppt-key{padding:.12em .34em;border:1px solid currentColor;letter-spacing:.06em}
   #hint .ppt-sep{opacity:.55}
   body.dark-bg #hint{color:var(--paper);opacity:.4}
@@ -1185,6 +1185,28 @@
 </head>
 <body class="canvas-mode">
 <script>
+  /* The dsh document preview uses an opaque sandbox: direct localStorage access
+     throws, which would abort the navigation and presenter setup below. Use the
+     real storage when it is available and an in-memory equivalent otherwise. */
+  window.safeStorage = (() => {
+    try {
+      const storage = window.localStorage;
+      storage.getItem('__dsh_probe__');
+      return storage;
+    } catch {
+      const memory = new Map();
+      return {
+        getItem(key) { return memory.has(key) ? memory.get(key) : null; },
+        setItem(key, value) { memory.set(key, String(value)); },
+        removeItem(key) { memory.delete(key); },
+        clear() { memory.clear(); },
+        key(index) { return [...memory.keys()][index] ?? null; },
+        get length() { return memory.size; },
+      };
+    }
+  })();
+</script>
+<script>
   // Windows 平台标记 — 雅黑没有 ExtraLight,需要字重补偿
   if(/Win/i.test(navigator.platform || navigator.userAgentData?.platform || '')){
     document.body.classList.add('is-win');
@@ -1192,7 +1214,7 @@
   (function(){
     const KEY = 'guizang-ppt-low-power';
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const stored = localStorage.getItem(KEY);
+    const stored = safeStorage.getItem(KEY);
     window.__lowPowerMode = stored === '1' || (stored === null && reduced);
     function updateHint(){
       const label = document.querySelector('.ppt-low-power-label');
@@ -1201,7 +1223,7 @@
     window.__setLowPowerMode = function(on, opts={}){
       window.__lowPowerMode = !!on;
       document.body.classList.toggle('low-power', window.__lowPowerMode);
-      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(opts.persist !== false) safeStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
       if(window.__lowPowerMode && document.getAnimations){
         document.getAnimations().forEach(a=>a.cancel());
       }
@@ -1587,12 +1609,12 @@ window.__pptPresenter=(()=>{
   const storageKey=name=>`guizang-ppt-${name}:${location.pathname}`;
   let mode='deck',session=query.get('session')||Math.random().toString(36).slice(2),audienceWindow=null;
   let channel=null,transportReady=false,popupBlocked=false,audienceOpenedAt=0,lastAckAt=0,lastAckIndex=-1,lastAckSeq=-1,seq=0,lastPingAt=0;
-  let renderedNoteId='',saveTimer=0,noteSize=Number(localStorage.getItem('guizang-ppt-note-size')||17),presenterFrameObserver=null;
+  let renderedNoteId='',saveTimer=0,noteSize=Number(safeStorage.getItem('guizang-ppt-note-size')||17),presenterFrameObserver=null;
   let elapsed=0,timerRunning=false,timerStartedAt=0,timedSlideIndex=idx,slideTimerStartedAt=0,slideElapsed=Array(total).fill(0);
   let rehearsalActive=false,presenterOverviewOn=false,lowPowerBeforePresenter=window.__lowPowerMode;
-  let layoutMode=localStorage.getItem(storageKey('layout'))||'balanced';
-  let autoEnabled=localStorage.getItem(storageKey('auto-enabled'))==='1';
-  let autoGlobalSeconds=Math.max(0,Number(localStorage.getItem(storageKey('auto-seconds'))||0));
+  let layoutMode=safeStorage.getItem(storageKey('layout'))||'balanced';
+  let autoEnabled=safeStorage.getItem(storageKey('auto-enabled'))==='1';
+  let autoGlobalSeconds=Math.max(0,Number(safeStorage.getItem(storageKey('auto-seconds'))||0));
   let autoDeadline=0,autoRemainingMs=0;
   let screenMode='normal',audienceFrozen=false;
   let annotationTool='none',annotationPointerDown=false,annotationStart=null,draftCircle=null,circles=[],audienceCircles=[];
@@ -1621,12 +1643,12 @@ window.__pptPresenter=(()=>{
   }
   function noteStorageKey(id){return `guizang-ppt-note:${location.pathname}:${id}`;}
   function loadNoteValue(id,i,n){
-    const saved=localStorage.getItem(noteStorageKey(id));
+    const saved=safeStorage.getItem(noteStorageKey(id));
     if(saved!==null)return saved;
     const prefix=window.__PPT_LEGACY_NOTE_KEY__;
     if(prefix){
-      const legacy=localStorage.getItem(`${prefix}:${i}`);
-      if(legacy!==null){localStorage.setItem(noteStorageKey(id),legacy);return legacy;}
+      const legacy=safeStorage.getItem(`${prefix}:${i}`);
+      if(legacy!==null){safeStorage.setItem(noteStorageKey(id),legacy);return legacy;}
     }
     return generatedNote(n);
   }
@@ -1816,9 +1838,9 @@ window.__pptPresenter=(()=>{
   }
   function saveNote(){
     const saved=document.getElementById('ppt-saved');saved.textContent='保存中…';saved.classList.remove('ppt-saved');clearTimeout(saveTimer);
-    saveTimer=setTimeout(()=>{localStorage.setItem(noteStorageKey(renderedNoteId),document.getElementById('ppt-note-editor').value);saved.textContent='已保存';saved.classList.add('ppt-saved');},300);
+    saveTimer=setTimeout(()=>{safeStorage.setItem(noteStorageKey(renderedNoteId),document.getElementById('ppt-note-editor').value);saved.textContent='已保存';saved.classList.add('ppt-saved');},300);
   }
-  function setNoteSize(value,persist=true){noteSize=Math.max(14,Math.min(26,value));document.documentElement.style.setProperty('--ppt-note-size',`${noteSize}px`);if(persist)localStorage.setItem('guizang-ppt-note-size',String(noteSize));}
+  function setNoteSize(value,persist=true){noteSize=Math.max(14,Math.min(26,value));document.documentElement.style.setProperty('--ppt-note-size',`${noteSize}px`);if(persist)safeStorage.setItem('guizang-ppt-note-size',String(noteSize));}
   function currentElapsed(){return elapsed+(timerRunning?Date.now()-timerStartedAt:0);}
   function currentSlideElapsed(i=idx){return slideElapsed[i]+(timerRunning&&timedSlideIndex===i?Date.now()-slideTimerStartedAt:0);}
   function commitRunningTime(now=Date.now()){
@@ -1848,7 +1870,7 @@ window.__pptPresenter=(()=>{
     if(timerRunning){timerStartedAt=Date.now();slideTimerStartedAt=timerStartedAt;}else{timerStartedAt=0;slideTimerStartedAt=0;}
     renderTimer();
   }
-  function rehearsalHistory(){try{return JSON.parse(localStorage.getItem(storageKey('rehearsals'))||'[]');}catch(e){return[];}}
+  function rehearsalHistory(){try{return JSON.parse(safeStorage.getItem(storageKey('rehearsals'))||'[]');}catch(e){return[];}}
   function toggleRehearsal(){
     if(rehearsalActive){finishRehearsal(true);return;}
     rehearsalActive=true;if(timerRunning){commitRunningTime();timerRunning=false;}resetTimer();toggleTimer();renderTimer();
@@ -1856,7 +1878,7 @@ window.__pptPresenter=(()=>{
   function finishRehearsal(showSummary){
     if(!rehearsalActive)return;if(timerRunning){commitRunningTime();timerRunning=false;}
     const result={endedAt:Date.now(),totalMs:elapsed,slides:slideElapsed.map((ms,i)=>({index:i,id:slideId(i),title:noteAt(i).title||slideId(i),ms,targetMs:plannedMsAt(i)}))};
-    const history=rehearsalHistory();history.unshift(result);try{localStorage.setItem(storageKey('rehearsals'),JSON.stringify(history.slice(0,5)));}catch(e){}
+    const history=rehearsalHistory();history.unshift(result);try{safeStorage.setItem(storageKey('rehearsals'),JSON.stringify(history.slice(0,5)));}catch(e){}
     rehearsalActive=false;renderTimer();if(showSummary)openRehearsalSummary(result,history.slice(0,5));
   }
   function openRehearsalSummary(result,history){
@@ -1893,7 +1915,7 @@ window.__pptPresenter=(()=>{
   }
   function toggleAutoAdvance(){
     if(!autoEnabled&&!autoDurationMs()){openSettings();return;}
-    autoEnabled=!autoEnabled;localStorage.setItem(storageKey('auto-enabled'),autoEnabled?'1':'0');armAutoAdvance();renderAutoState();
+    autoEnabled=!autoEnabled;safeStorage.setItem(storageKey('auto-enabled'),autoEnabled?'1':'0');armAutoAdvance();renderAutoState();
   }
 
   function openDialog(title,html){
@@ -1904,7 +1926,7 @@ window.__pptPresenter=(()=>{
   function applyLayout(value,persist=true){
     layoutMode=['balanced','slides','notes'].includes(value)?value:'balanced';
     document.getElementById('ppt-presenter')?.setAttribute('data-layout',layoutMode);
-    if(persist)localStorage.setItem(storageKey('layout'),layoutMode);requestAnimationFrame(fitPresenterFrames);
+    if(persist)safeStorage.setItem(storageKey('layout'),layoutMode);requestAnimationFrame(fitPresenterFrames);
   }
   function applyAudienceScreen(value){
     const cover=document.getElementById('ppt-audience-cover');if(!cover)return;
@@ -1926,7 +1948,7 @@ window.__pptPresenter=(()=>{
     document.querySelectorAll('[data-screen-choice]').forEach(button=>{button.classList.toggle('ppt-primary',button.dataset.screenChoice===screenMode);button.onclick=()=>{setScreenMode(button.dataset.screenChoice);openSettings();};});
     const secondsInput=document.getElementById('ppt-auto-seconds-setting'),stepSeconds=delta=>{const current=Math.max(0,Number(secondsInput.value||0));secondsInput.value=String(Math.max(1,current+delta));};
     document.getElementById('ppt-auto-minus').onclick=()=>stepSeconds(-1);document.getElementById('ppt-auto-plus').onclick=()=>stepSeconds(1);
-    document.getElementById('ppt-settings-save').onclick=()=>{autoEnabled=document.getElementById('ppt-auto-enabled-setting').checked;autoGlobalSeconds=Math.max(0,Number(secondsInput.value||0));localStorage.setItem(storageKey('auto-enabled'),autoEnabled?'1':'0');localStorage.setItem(storageKey('auto-seconds'),String(autoGlobalSeconds));armAutoAdvance();closeDialog();};
+    document.getElementById('ppt-settings-save').onclick=()=>{autoEnabled=document.getElementById('ppt-auto-enabled-setting').checked;autoGlobalSeconds=Math.max(0,Number(secondsInput.value||0));safeStorage.setItem(storageKey('auto-enabled'),autoEnabled?'1':'0');safeStorage.setItem(storageKey('auto-seconds'),String(autoGlobalSeconds));armAutoAdvance();closeDialog();};
     document.getElementById('ppt-open-shortcuts').onclick=openShortcuts;
   }
   function openShortcuts(){
@@ -1961,7 +1983,7 @@ window.__pptPresenter=(()=>{
   function emit(payload,{persist=true}={}){
     const message={__guizangPptSync:1,session,role:mode,...payload,at:Date.now(),nonce:Math.random().toString(36).slice(2)};
     try{channel?.postMessage(message);}catch(e){}
-    if(persist)try{localStorage.setItem(syncKey(),JSON.stringify(message));}catch(e){}
+    if(persist)try{safeStorage.setItem(syncKey(),JSON.stringify(message));}catch(e){}
     try{if(mode==='presenter'&&audienceWindow&&!audienceWindow.closed)audienceWindow.postMessage(message,'*');}catch(e){}
     try{if(mode==='audience'&&window.opener&&!window.opener.closed)window.opener.postMessage(message,'*');}catch(e){}
   }

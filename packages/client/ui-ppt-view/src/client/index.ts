@@ -15,6 +15,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-tool/client'
 import type {} from '@deepseek-ai/dsh-client-ui-slots'
 import { PptView } from './PptView.tsx'
+import { PptDownloadAction } from './DownloadAction.tsx'
 import { en, NS, zh, type PptViewKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -33,6 +34,9 @@ export const inject = ['slots', 'locale']
  */
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-ppt-view: dictionaries')
+  ctx.slots.inject('sidebar.right.tab.document.actions', () => ctx.slots.register({
+    name: 'sidebar.right.tab.document.actions', id: 'ppt-download', locale: NS,
+  }, PptDownloadAction))
   ctx.slots.inject('tool.call.toolview', function* () {
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'ppt_create', locale: NS }, PptView)
     yield ctx.slots.register({ name: 'tool.call.toolview', key: 'ppt_export', locale: NS }, PptView)

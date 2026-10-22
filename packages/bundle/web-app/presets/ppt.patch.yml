@@ -27,7 +27,7 @@
 
                 The export is a high-fidelity image-based PPTX: the visual matches the HTML exactly, and the text is not editable. Say that plainly when the user asks for an editable file; do not promise editable text. If the export fails, the HTML is still available; report the warning and let the user preview it, then call ppt_export again after fixing the cause.
 
-                Surface both artifacts in the final answer: the absolute htmlPath as the preview file link, and the tool's pptxUrl as a Markdown link labeled 下载 PPTX. Use the exact pptxUrl the tool returned; never invent a URL. Lead with the deck title, slide count, and the one narrative choice the user might want changed. Do not paste the slide HTML or the whole outline. Each user message is a new task; do not resume an earlier deck unless asked.
+                End the final answer with exactly these two Markdown links, on their own lines, copied from the tool result: [预览 HTML](<htmlPath>) and [下载 PPTX](<pptxUrl>). The preview link opens the existing HTML iframe; the download link hits the authenticated file route with download=1. Never write either as plain text and never invent a URL. Lead with the deck title, slide count, and the one narrative choice the user might want changed. Do not paste the slide HTML or the whole outline. Each user message is a new task; do not resume an earlier deck unless asked.
 
           - id: ppt-tools
             name: '@deepseek-ai/dsh-ppt-local/tools'
