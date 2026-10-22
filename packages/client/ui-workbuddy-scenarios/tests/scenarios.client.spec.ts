@@ -32,13 +32,13 @@ describe('the scenario taxonomy', () => {
   })
 
   it('names an agent preset only where a capability backs the pick', () => {
-    // Finance, video, and Xiaohongshu are the sub-scenarios whose pick reaches
-    // an agent instead of only writing a starter; the other seventeen stay as
-    // they were.
-    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['finance', 'video', 'xhs'])
+    // Finance, slides, video, and Xiaohongshu are the sub-scenarios whose pick
+    // reaches an agent instead of only writing a starter; the rest stay as they were.
+    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['finance', 'slides', 'video', 'xhs'])
     expect(SUBS.find(sub => sub.id === 'finance')?.presetId).toBe('finance')
     expect(SUBS.find(sub => sub.id === 'video')?.presetId).toBe('video')
     expect(SUBS.find(sub => sub.id === 'xhs')?.presetId).toBe('xiaohongshu')
+    expect(SUBS.find(sub => sub.id === 'slides')?.presetId).toBe('ppt')
   })
 
   it('carries video generation under the design scenario rather than office', () => {

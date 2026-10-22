@@ -238,6 +238,7 @@
   ],
   "references": [
     { "path": "./packages/finance/finance-local" },
+    { "path": "./packages/design/ppt-local" },
     { "path": "./packages/video/video-local" },
     { "path": "./packages/video/xhs-local" },
     { "path": "./packages/experimental/client-ui-cot-translation/tsconfig.host.json" },

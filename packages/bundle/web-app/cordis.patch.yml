@@ -472,6 +472,8 @@
 
     - id: ui-xhs-view
       name: '@deepseek-ai/dsh-client-ui-xhs-view'
+    - id: ui-ppt-view
+      name: '@deepseek-ai/dsh-client-ui-ppt-view'
 
     - id: ui-settings-session-log
       name: '@deepseek-ai/dsh-client-ui-settings-session-log'

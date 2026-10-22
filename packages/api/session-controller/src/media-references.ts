@@ -5,7 +5,7 @@
  * @module @deepseek-ai/dsh-api-session-controller/media-references
  */
 
-import { isAbsolute } from 'node:path'
+import { basename, isAbsolute } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-connection'
 import type {} from '@deepseek-ai/dsh-attachment'
@@ -22,7 +22,9 @@ const BASE_HEADERS = {
 async function serveFile(request: Request, fs: FileSystem, maxBytes: number): Promise<Response> {
   const fail = (status: number, text: string): Response =>
     new Response(request.method === 'HEAD' ? null : text, { status, headers: BASE_HEADERS })
-  const path = new URL(request.url).searchParams.get('path')
+  const url = new URL(request.url)
+  const path = url.searchParams.get('path')
+  const download = url.searchParams.has('download')
   if (path === null || path.length === 0) return fail(400, 'missing path')
   if (path.includes('\0') || !isAbsolute(path)) return fail(400, 'absolute path required')
   try {
@@ -32,6 +34,7 @@ async function serveFile(request: Request, fs: FileSystem, maxBytes: number): Pr
       ...BASE_HEADERS,
       'Content-Type': mediaType,
     }
+    if (download) headers['Content-Disposition'] = `attachment; filename*=UTF-8''${encodeURIComponent(basename(target.displayPath))}`
     if (request.method === 'HEAD') {
       const info = await fs.stat(target, request.signal)
       if (info === undefined) return fail(404, 'not found')

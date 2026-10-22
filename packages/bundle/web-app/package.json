@@ -43,7 +43,8 @@
     "lib/types/**/*.d.ts",
     "presets/finance.patch.yml",
     "presets/video.patch.yml",
-    "presets/xiaohongshu.patch.yml"
+    "presets/xiaohongshu.patch.yml",
+    "presets/ppt.patch.yml"
   ],
   "license": "MIT",
   "dsh": {
@@ -56,7 +57,8 @@
         "./presets/cordis.patch.yml",
         "./presets/finance.patch.yml",
         "./presets/video.patch.yml",
-        "./presets/xiaohongshu.patch.yml"
+        "./presets/xiaohongshu.patch.yml",
+        "./presets/ppt.patch.yml"
       ]
     }
   },
@@ -203,7 +205,9 @@
     "@deepseek-ai/dsh-xhs-local": "workspace:*",
     "@deepseek-ai/schemastery": "workspace:~",
     "commander": "^15.0.0",
-    "open": "^11.0.2"
+    "open": "^11.0.2",
+    "@deepseek-ai/dsh-ppt-local": "workspace:*",
+    "@deepseek-ai/dsh-client-ui-ppt-view": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:~",

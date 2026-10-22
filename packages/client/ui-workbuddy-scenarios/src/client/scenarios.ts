@@ -53,7 +53,12 @@ export const SCENARIOS: readonly Scenario[] = [
       },
       { id: 'analytics', labelKey: 'office.analytics', templateKey: 'office.analytics.template' },
       { id: 'workbench', labelKey: 'office.workbench', templateKey: 'office.workbench.template' },
-      { id: 'slides', labelKey: 'office.slides', templateKey: 'office.slides.template' },
+      {
+        id: 'slides',
+        labelKey: 'office.slides',
+        templateKey: 'office.slides.template',
+        presetId: 'ppt',
+      },
       { id: 'research', labelKey: 'office.research', templateKey: 'office.research.template' },
     ],
   },

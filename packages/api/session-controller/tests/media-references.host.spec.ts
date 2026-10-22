@@ -94,6 +94,17 @@ describe('SessionMediaReferences /api/file', () => {
     expect((await route.call(path)).status).toBe(413)
   })
 
+  it('marks a download request as an attachment with a UTF-8 filename', async () => {
+    const route = await mount()
+    const path = join(root, '季度报告.pptx')
+    await writeFile(path, PNG_BYTES)
+    const response = await route.raw(`http://127.0.0.1/api/file?path=${encodeURIComponent(path)}&download=1`)
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-disposition')).toBe(
+      `attachment; filename*=UTF-8''${encodeURIComponent('季度报告.pptx')}`,
+    )
+  })
+
   it.each([
     ['png', 'image/png'], ['svg', 'image/svg+xml'], ['mp4', 'video/mp4'], ['mp3', 'audio/mpeg'],
     ['txt', 'text/plain'], ['html', 'text/html'], ['bin', 'application/octet-stream'], ['', 'application/octet-stream'],
