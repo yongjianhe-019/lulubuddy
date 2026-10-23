@@ -108,6 +108,62 @@ function renderWarning(warning: JsonValue): string {
   return typeof warning === 'string' ? warning : JSON.stringify(warning)
 }
 
+
+/** Read a JSON object without trusting its shape. */
+function objectOf(value: JsonValue | undefined): Record<string, JsonValue> | null {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? value as Record<string, JsonValue>
+    : null
+}
+
+/** Read a string, or the empty string. */
+function stringOf(value: JsonValue | undefined): string {
+  return typeof value === 'string' ? value : ''
+}
+
+/** Render the recent-analysis read as readable Markdown instead of raw JSON. */
+function renderJournal(value: Record<string, JsonValue>): string {
+  const document = objectOf(value)
+  const entries = Array.isArray(document?.['entries']) ? document['entries'] : []
+  const warnings = Array.isArray(value['warnings']) ? value['warnings'] : []
+  const parts: string[] = []
+  if (warnings.length > 0) parts.push(`Data warnings:\n${warnings.map(renderWarning).map(item => `- ${item}`).join('\n')}`)
+  const markdown = stringOf(document?.['journal_markdown'])
+  if (markdown !== '') parts.push(markdown)
+  else parts.push(entries.length === 0 ? 'No recent analysis records.' : `${String(entries.length)} recent records.`)
+  return parts.join('\n\n')
+}
+
+/** Render the multi-day dragon-head read as readable Markdown. */
+function renderDragonHistory(value: Record<string, JsonValue>): string {
+  const document = objectOf(value)
+  const entries = Array.isArray(document?.['entries']) ? document['entries'] : []
+  const warnings = Array.isArray(value['warnings']) ? value['warnings'] : []
+  const parts: string[] = []
+  if (warnings.length > 0) parts.push(`Data warnings:\n${warnings.map(renderWarning).map(item => `- ${item}`).join('\n')}`)
+  if (entries.length === 0) {
+    parts.push('No dragon-head daily reviews found.')
+    return parts.join('\n\n')
+  }
+  const lines = ['## 龙头复盘历史', '']
+  for (const item of entries) {
+    const entry = objectOf(item)
+    if (entry === null) continue
+    const env = objectOf(entry['env'])
+    const sentiment = objectOf(entry['sentiment'])
+    const candidates = Array.isArray(entry['candidates']) ? entry['candidates'] : []
+    const candidateText = candidates.slice(0, 5).map((candidate) => {
+      const row = objectOf(candidate)
+      return row === null ? '' : `${stringOf(row['name'])}(${stringOf(row['code'])})`
+    }).filter(Boolean).join('、')
+    lines.push(`- **${stringOf(entry['date']) || '—'}**：龙头闸门${env?.['strong'] === true ? '通过' : '否决'}；涨停 ${String(sentiment?.['limitup_total'] ?? '—')}、炸板 ${String(sentiment?.['broken'] ?? '—')}、最高 ${String(sentiment?.['max_streak'] ?? '—')} 板${candidateText === '' ? '' : `；候选 ${candidateText}`}`)
+  }
+  parts.push(lines.join('\n'))
+  const track = Array.isArray(document?.['track']) ? document['track'] : []
+  if (track.length > 0) parts.push(`跟踪台账：${String(track.length)} 条（最近 ${String(track.slice(0, 5).map(row => stringOf(objectOf(row)?.['date'])).filter(Boolean).join('、') || '—')}）`)
+  return parts.join('\n\n')
+}
+
 /** The shared open-object output spec: every finance document is one JSON object. */
 const DOCUMENT_SCHEMA = { type: 'object', additionalProperties: true } as const
 
@@ -183,10 +239,11 @@ export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, time
 
   ctx.tools.register(defineTool({
     name: 'market_dashboard',
-    description: 'Build the project\'s full daily snapshot in one call: the core CSI 300 and CSI 2000 actions, the next trigger, the satellite opportunity radar, the dragon-head gate, the human-maintained positions, the current plan, and any degraded data panels. Use this for a daily review or any question that spans several engines. Set record to true only when the user wants the project\'s daily journal and machine-readable record written.',
+    description: 'Build the project\'s full daily snapshot in one call: the core CSI 300 and CSI 2000 actions, the next trigger, the satellite opportunity radar, the dragon-head gate, the human-maintained positions, the current plan, the three most recent journal entries, and any degraded data panels. Use this for a daily review or any question that spans several engines. Set record to true only when the user wants the project\'s daily journal and machine-readable record written.',
     parameters: {
       force: { type: 'boolean', description: 'Refetch every series instead of reusing today\'s cache. Defaults to false.' },
       record: { type: 'boolean', description: 'Write the project\'s daily journal and machine-readable record. Defaults to false; ask before writing.' },
+      include_history: { type: 'boolean', description: 'Append the three most recent journal entries to the report. Defaults to true.' },
     },
     output: {
       schema: DOCUMENT_SCHEMA,
@@ -209,6 +266,7 @@ export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, time
         arguments: {
           ...args.force === undefined ? {} : { force: args.force },
           ...args.record === undefined ? {} : { record: args.record },
+          ...args.include_history === undefined ? {} : { include_history: args.include_history },
         },
       }, exec.signal))
     },
@@ -267,6 +325,55 @@ export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, time
       return toolValue(await finance.invoke({
         operation: 'dragon_head',
         arguments: { ...args.as_of === undefined ? {} : { as_of: args.as_of } },
+      }, exec.signal))
+    },
+  }))
+
+
+  ctx.tools.register(defineTool({
+    name: 'journal_recent',
+    description: 'Read the most recent core trade-journal entries, satellite trade-journal entries, and daily reports. Call this before any analysis that should respect the previous plan, the gap to the trigger, or the last review; report continuity and divergence, not just the current signal. The result is compact Markdown.',
+    parameters: {
+      limit: { type: 'number', description: 'Maximum records to return, 1-20. Defaults to 5.' },
+      kind: { type: 'string', enum: ['all', 'core', 'satellite', 'daily'], description: 'Journal family. Defaults to all.' },
+      include_text: { type: 'boolean', description: 'Include the full clipped entry text. Defaults to false.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderJournal(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'journal_recent',
+        arguments: {
+          ...args.limit === undefined ? {} : { limit: args.limit },
+          ...args.kind === undefined ? {} : { kind: args.kind },
+          ...args.include_text === undefined ? {} : { include_text: args.include_text },
+        },
+      }, exec.signal))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'dragon_history',
+    description: 'Read the latest N post-close dragon-head reviews, newest first, with the limit-up structure and candidate pool for each day. Use this when the user asks how the dragon gate or the candidate ledger changed across several sessions; dragon_head remains the single latest review.',
+    parameters: {
+      limit: { type: 'number', description: 'Maximum daily reviews to return, 1-20. Defaults to 5.' },
+      as_of: { type: 'string', description: 'Optional YYYY-MM-DD upper bound.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderDragonHistory(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'dragon_history',
+        arguments: {
+          ...args.limit === undefined ? {} : { limit: args.limit },
+          ...args.as_of === undefined ? {} : { as_of: args.as_of },
+        },
       }, exec.signal))
     },
   }))

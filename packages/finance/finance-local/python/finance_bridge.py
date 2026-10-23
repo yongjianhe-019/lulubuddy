@@ -29,6 +29,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import re
 import sys
 import traceback
 from datetime import date, datetime
@@ -488,6 +489,143 @@ def _latest_dragon(asof: str | None) -> tuple[dict[str, Any], list[str]]:
     return {"available": True, "file": str(path), **_jsonable(payload)}, []
 
 
+
+
+def _clip(text: str, limit: int) -> str:
+    """Trim one Markdown block to a readable excerpt without cutting mid-word."""
+    clean = text.strip()
+    if len(clean) <= limit:
+        return clean
+    return clean[: max(0, limit - 1)].rstrip() + "…"
+
+
+def _sections(text: str, marker: str) -> list[tuple[str, str]]:
+    """Split Markdown at one heading level, ignoring fenced code blocks."""
+    pattern = re.compile(r"^" + re.escape(marker) + r"\s+(.+?)\s*$")
+    sections: list[tuple[str, str]] = []
+    heading: str | None = None
+    body: list[str] = []
+    fenced = False
+    for line in text.splitlines():
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            if heading is not None:
+                body.append(line)
+            continue
+        match = None if fenced else pattern.match(line)
+        if match is not None:
+            if heading is not None:
+                sections.append((heading, "\n".join(body).strip()))
+            heading = match.group(1).strip()
+            body = []
+            continue
+        if heading is not None:
+            body.append(line)
+    if heading is not None:
+        sections.append((heading, "\n".join(body).strip()))
+    return sections
+
+
+def _pick_sections(sections: list[tuple[str, str]], *keywords: str) -> str:
+    """Join every section whose heading contains one of the keywords."""
+    picked = [body for heading, body in sections if any(word in heading for word in keywords)]
+    return "\n\n".join(part for part in picked if part).strip()
+
+
+def _journal_entry(kind: str, heading: str, body: str) -> dict[str, Any]:
+    """Convert one journal entry into the compact shape the analysis prompt reads."""
+    match = re.match(r"(\d{4}-\d{2}-\d{2})", heading)
+    date_value = match.group(1) if match is not None else ""
+    subs = _sections(body, "###")
+    conclusion = _pick_sections(subs, "模型信号", "结论", "信号")
+    plan = _pick_sections(subs, "操作计划", "计划")
+    review = _pick_sections(subs, "复盘", "实际操作", "成交")
+    summary = conclusion or plan or review or body
+    return {
+        "kind": kind,
+        "date": date_value,
+        "heading": heading,
+        "summary": _clip(summary, 700),
+        "conclusion": _clip(conclusion, 1600),
+        "plan": _clip(plan, 1400),
+        "review": _clip(review, 1400),
+        "excerpt": _clip(body, 3000),
+    }
+
+
+def _daily_entry(path: Path) -> dict[str, Any]:
+    """Convert one `journal/daily/YYYY-MM-DD.md` report into the compact shape."""
+    text = path.read_text(encoding="utf-8")
+    sections = _sections(text, "##")
+    conclusion = _pick_sections(sections, "结论")
+    signals = _pick_sections(sections, "模型信号")
+    plan = _pick_sections(sections, "操作计划")
+    review = _pick_sections(sections, "实际操作", "次日收盘复盘", "复盘")
+    summary = conclusion or signals or review or text
+    return {
+        "kind": "daily",
+        "date": path.stem,
+        "heading": path.stem,
+        "summary": _clip(summary, 800),
+        "conclusion": _clip(conclusion, 1600),
+        "signals": _clip(signals, 1600),
+        "plan": _clip(plan, 1600),
+        "review": _clip(review, 1600),
+        "excerpt": _clip(text, 5000),
+    }
+
+
+def _plain(text: str) -> str:
+    """Drop Markdown emphasis from compact summaries; keep the words."""
+    return text.replace("**", "").replace("__", "").replace("`", "")
+
+
+def _compact_plan(plan: str) -> str:
+    """Turn a Markdown plan table into a few short rows without losing the action."""
+    rows: list[str] = []
+    for line in plan.splitlines():
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 4 or all(set(cell) <= {"-", ":", " "} for cell in cells):
+            continue
+        target, action, position = cells[1], cells[2], cells[3]
+        if target in ("标的", "target"):
+            continue
+        rows.append(f"{target} {action} 仓位 {position}")
+    return "；".join(rows[:4])
+
+
+def _compact_review(review: str) -> str:
+    """Keep the first two review points, not the whole filled-in report."""
+    points: list[str] = []
+    for line in review.splitlines():
+        clean = line.strip().lstrip("-* ").strip()
+        if clean and not clean.startswith("|") and not clean.startswith("量化指标"):
+            points.append(clean)
+        if len(points) == 2:
+            break
+    return "；".join(points)
+
+
+def _journal_markdown(entries: list[dict[str, Any]]) -> str:
+    """Render compact journal entries as a readable Markdown appendix."""
+    labels = {"core": "核心", "satellite": "卫星", "daily": "日报"}
+    blocks: list[str] = []
+    for entry in entries:
+        date_value = entry.get("date") or "—"
+        label = labels.get(str(entry.get("kind")), str(entry.get("kind") or "记录"))
+        summary = re.sub(r"\s*-\s+", "；", re.sub(r"\s+", " ", str(entry.get("summary") or "")))
+        summary = re.sub(r"[；;]\s*[；;]+", "；", _plain(summary)).replace("。；", "；").replace("；。", "；").strip(" -；")
+        lines = [f"### {date_value} · {label}", "", f"- 结论：{_clip(summary, 360) or '—'}"]
+        plan = _plain(_compact_plan(str(entry.get("plan") or "")))
+        if plan:
+            lines.append(f"- 计划：{_clip(plan, 360)}")
+        review = _plain(_compact_review(str(entry.get("review") or "")))
+        if review:
+            lines.append(f"- 复盘：{_clip(review, 360)}")
+        blocks.append("\n".join(lines))
+    return "\n\n".join(blocks)
+
+
 def op_dashboard(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
     """Build the full daily snapshot: core signals, satellite radar, dragon gate, plan."""
     import dashboard
@@ -503,8 +641,20 @@ def op_dashboard(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], 
     radar = radar_scan()
     snapshot = dashboard.build_snapshot(data, macro, signal, opp, radar)
     report_markdown = dashboard.report.render_markdown(snapshot)
-    document = {"ratio": _jsonable(ratio), **snapshot, "report_markdown": report_markdown}
     warnings = _data_warnings(data)
+    history: list[dict[str, Any]] = []
+    if arguments.get("include_history", True):
+        history_document, history_warnings, _ = op_journal_recent({"limit": 3, "kind": "all"})
+        history = history_document.get("entries") or []
+        warnings.extend(history_warnings)
+        if history:
+            report_markdown += "\n\n## 七、近期分析对照\n\n" + _journal_markdown(history)
+    document = {
+        "ratio": _jsonable(ratio),
+        **snapshot,
+        "report_markdown": report_markdown,
+        "history": history,
+    }
     if arguments.get("record"):
         try:
             jp, mp = dashboard.report.write_daily(snapshot)
@@ -649,6 +799,105 @@ def op_journal_append(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[s
     return {"kind": kind, "path": str(path), "appended": True}, [], _charts([])
 
 
+
+
+def op_journal_recent(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Read the most recent core, satellite, and daily analysis records."""
+    try:
+        limit = max(1, min(20, int(arguments.get("limit", 5))))
+    except (TypeError, ValueError) as error:
+        raise RuntimeError("journal limit must be an integer") from error
+    kind = arguments.get("kind", "all")
+    if kind not in ("all", "core", "satellite", "daily"):
+        raise RuntimeError("journal kind must be all, core, satellite, or daily")
+    include_text = bool(arguments.get("include_text", False))
+    root = _stock_market_root()
+    entries: list[dict[str, Any]] = []
+    warnings: list[str] = []
+
+    if kind in ("all", "core", "satellite"):
+        for journal_kind, filename in (("core", "trade-journal.md"), ("satellite", "satellite-trade-journal.md")):
+            if kind not in ("all", journal_kind):
+                continue
+            path = root / "journal" / filename
+            if not path.is_file():
+                warnings.append(f"{filename} unavailable")
+                continue
+            try:
+                text = path.read_text(encoding="utf-8")
+            except Exception as error:  # noqa: BLE001 - one unreadable journal must not hide the rest
+                warnings.append(f"{filename} unreadable: {error}")
+                continue
+            for heading, body in _sections(text, "##"):
+                if not re.match(r"\d{4}-\d{2}-\d{2}", heading):
+                    continue
+                entries.append(_journal_entry(journal_kind, heading, body))
+
+    if kind in ("all", "daily"):
+        daily_dir = root / "journal" / "daily"
+        if not daily_dir.is_dir():
+            warnings.append("journal/daily unavailable")
+        else:
+            for path in sorted(daily_dir.glob("*.md")):
+                try:
+                    entries.append(_daily_entry(path))
+                except Exception as error:  # noqa: BLE001 - one damaged day must not hide the rest
+                    warnings.append(f"{path.name} unreadable: {error}")
+
+    entries.sort(key=lambda entry: str(entry.get("date") or ""), reverse=True)
+    entries = entries[:limit]
+    if not include_text:
+        for entry in entries:
+            entry.pop("excerpt", None)
+    document = {
+        "kind": kind,
+        "limit": limit,
+        "entries": entries,
+        "counts": {
+            "core": sum(1 for entry in entries if entry.get("kind") == "core"),
+            "satellite": sum(1 for entry in entries if entry.get("kind") == "satellite"),
+            "daily": sum(1 for entry in entries if entry.get("kind") == "daily"),
+        },
+        "journal_markdown": _journal_markdown(entries),
+    }
+    return document, warnings, _charts([])
+
+
+def op_dragon_history(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Read the latest N dragon-head post-close reviews, newest first."""
+    try:
+        limit = max(1, min(20, int(arguments.get("limit", 5))))
+    except (TypeError, ValueError) as error:
+        raise RuntimeError("dragon history limit must be an integer") from error
+    as_of = arguments.get("as_of")
+    daily_dir = _stock_market_root() / "dragon_head" / "data" / "daily"
+    files = sorted(daily_dir.glob("*.json"), reverse=True)
+    if as_of:
+        files = [path for path in files if path.stem <= str(as_of)]
+    warnings: list[str] = []
+    entries: list[dict[str, Any]] = []
+    for path in files:
+        if len(entries) >= limit:
+            break
+        document, day_warnings = _latest_dragon(path.stem)
+        warnings.extend(day_warnings)
+        if document.get("available"):
+            document["date"] = path.stem
+            entries.append(document)
+    if not entries and not warnings:
+        warnings.append("no dragon daily reviews found")
+    track_path = _stock_market_root() / "dragon_head" / "data" / "dragon_track.csv"
+    track: list[dict[str, Any]] = []
+    if track_path.is_file():
+        try:
+            import pandas as pd
+            track = _jsonable(pd.read_csv(track_path).tail(20).to_dict(orient="records"))
+        except Exception as error:  # noqa: BLE001 - history remains useful without the ledger
+            warnings.append(f"dragon track unavailable: {error}")
+    document = {"entries": entries, "track": track, "limit": limit}
+    return document, warnings, _charts([])
+
+
 def op_strategy_doc(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
     """Read one whitelisted StockMarket strategy document for the mindset layer."""
     names = {
@@ -679,6 +928,8 @@ OPERATIONS: dict[str, Callable[[dict[str, Any]], tuple[dict[str, Any], list[str]
     "dragon_head": op_dragon_head,
     "positions": op_positions,
     "journal_append": op_journal_append,
+    "journal_recent": op_journal_recent,
+    "dragon_history": op_dragon_history,
     "strategy_doc": op_strategy_doc,
 }
 

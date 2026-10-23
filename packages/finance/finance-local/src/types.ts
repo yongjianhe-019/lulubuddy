@@ -28,6 +28,8 @@ export type FinanceOperation =
   | 'dragon_head'
   | 'positions'
   | 'journal_append'
+  | 'journal_recent'
+  | 'dragon_history'
   | 'strategy_doc'
 
 /** Each operation's arguments, keyed by operation. */
@@ -43,7 +45,7 @@ export interface FinanceRequestMap {
   /** Latest macro row, recent history, valuation, and bond yield. */
   readonly macro_snapshot: Record<string, never>
   /** Full daily snapshot: core signals, satellite radar, dragon gate, and plan. */
-  readonly dashboard: { readonly force?: boolean; readonly record?: boolean }
+  readonly dashboard: { readonly force?: boolean; readonly record?: boolean; readonly include_history?: boolean }
   /** CSI2000 ice-point gate: trigger, channel, position, and what is missing. */
   readonly ice_check: { readonly force?: boolean }
   /** Satellite ETF opportunity scan with R:R, conditional win rate, and EV. */
@@ -54,6 +56,10 @@ export interface FinanceRequestMap {
   readonly positions: Record<string, never>
   /** Append one entry to the core or satellite trade journal. */
   readonly journal_append: { readonly kind?: 'core' | 'satellite'; readonly entry: string }
+  /** Read recent trade-journal and daily-report entries. */
+  readonly journal_recent: { readonly limit?: number; readonly kind?: 'all' | 'core' | 'satellite' | 'daily'; readonly include_text?: boolean }
+  /** Read the latest N dragon-head daily reviews. */
+  readonly dragon_history: { readonly limit?: number; readonly as_of?: string }
   /** Read one whitelisted StockMarket strategy document. */
   readonly strategy_doc: { readonly name?: 'mindset' | 'progress' | 'readme' }
 }

@@ -79,6 +79,7 @@ export function DashboardView({ block, t }: FinanceViewProps) {
   const plan = list(document['plan'])
   const date = text(document['date'])
   const report = text(document['report_markdown'])
+  const history = list(document['history'])
   return (
     <Card title={t('card.dashboard')}>
       <WarningList warnings={parsed.warnings} t={t} />
@@ -133,6 +134,24 @@ export function DashboardView({ block, t }: FinanceViewProps) {
             <Kpi label={t('dashboard.sentiment')} value={text(asRecord(dragon['sentiment'])?.['state']) ?? '—'} />
             <Kpi label={t('dashboard.sectors')} value={list(dragon['sectors']).slice(0, 3).map(item => text(asRecord(item)?.['sector']) ?? '').filter(Boolean).join(' / ') || '—'} />
           </div>
+        )}
+      </Section>
+      <Section title={t('dashboard.history')}>
+        {history.length === 0 ? <p className={css.notice}>{t('dashboard.noHistory')}</p> : (
+          <ul className={css.historyList}>
+            {history.map((item, index) => {
+              const entry = asRecord(item)
+              if (entry === null) return null
+              const kind = text(entry['kind']) ?? '—'
+              return (
+                <li key={`history-${String(index)}`} className={css.historyItem}>
+                  <span className={css.historyDate}>{text(entry['date']) ?? '—'}</span>
+                  <span className={css.historyKind}>{t(`journal.${kind}` as 'journal.core')}</span>
+                  <span className={css.historySummary}>{text(entry['summary']) ?? '—'}</span>
+                </li>
+              )
+            })}
+          </ul>
         )}
       </Section>
       <Section title={t('dashboard.report')}>

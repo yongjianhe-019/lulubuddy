@@ -76,12 +76,14 @@ kind: "package-reference"
 | `csi2000_analysis` | 中证 2000 得分、三通道买入信号、其仓位比例与通道明细 |
 | `market_timing_signal` | 合成后的月度信号：冰点标记、各指数的卖出或回补腿及其理由、操作与仓位建议 |
 | `macro_snapshot` | 最新对齐的宏观行与近期历史，外加中证 300 估值与十年期国债收益率 |
-| `market_dashboard` | 组合日报：核心指数动作、下一触发、卫星机会、龙头闸门、持仓、计划与降级面板 |
+| `market_dashboard` | 组合日报：核心指数动作、下一触发、卫星机会、龙头闸门、持仓、计划、近期日志对照与降级面板 |
 | `csi2000_ice_check` | 买入闸门：ETF 收盘、MA10、通道、仓位、分数分位、回撤，以及离触发还差什么 |
 | `opportunity_radar` | 卫星 ETF 机会：R:R、条件胜率、EV、建议仓位与缺失条件 |
 | `dragon_head` | 最新盘后龙头复盘：环境、涨停情绪、板块结构与跟踪候选 |
 | `positions_snapshot` | 人工维护的持仓文件与卫星雷达状态 |
 | `journal_append` | 往核心或卫星交易日志追加一条分析记录 |
+| `journal_recent` | 最近的核心、卫星与日报记录：上次计划、触发缺口与复盘 |
+| `dragon_history` | 最近 N 份龙头盘后复盘（从新到旧）与跟踪候选台账 |
 | `strategy_doc` | 读取项目里的心法、进度或 README 文档 |
 
 每个分析工具都会先执行文档化的增量前置步骤（`fetch_all_data`/`fetch_all_macro` 且 `force=False`），因此当天写入的缓存会被复用，只下载过期的序列。`market_data_refresh` 的作用是在首次分析前显式执行该步骤。
@@ -116,7 +118,7 @@ Provider 在进程边界校验桥接脚本的 JSON 响应。非零退出会回�
 | [`src/service.ts`](src/service.ts) | `FinanceRuntime` Service Definition 与调用词汇 |
 | [`src/types.ts`](src/types.ts) | 操作、各操作的参数与结果文档 |
 | [`src/provider.ts`](src/provider.ts) | 每次调用一个进程的 Provider、响应解码、上限与取消 |
-| [`src/tools.ts`](src/tools.ts) | `tools` 入口：十二个面向模型的工具、其 JSON 呈现，以及它们在 `ctx.finance` 上的独立挂载 |
+| [`src/tools.ts`](src/tools.ts) | `tools` 入口：十四个面向模型的工具、其 JSON 呈现，以及它们在 `ctx.finance` 上的独立挂载 |
 | [`python/finance_bridge.py`](python/finance_bridge.py) | 面向分析项目的 stdin/stdout JSON 分发器 |
 | — | 不发布运行时不变式伴随文件；除 Seam 契约外本包不拥有可独立观测的关系，其上限由 Provider 强制执行。 |
 
@@ -147,7 +149,7 @@ Provider 在进程边界校验桥接脚本的 JSON 响应。非零退出会回�
 
 #### 模型看到什么
 
-模型看到上述十二个 schema，且只在挂载了 `tools` 入口的预设所组成的会话中看到；`market_data_refresh` 带有可选的 `force` 参数。数据源路径、解释器、上限与桥接协议对模型不可见。
+模型看到上述十四个 schema，且只在挂载了 `tools` 入口的预设所组成的会话中看到；`market_data_refresh` 带有可选的 `force` 参数。数据源路径、解释器、上限与桥接协议对模型不可见。
 
 #### Token 影响
 

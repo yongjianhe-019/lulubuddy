@@ -215,7 +215,9 @@ describe('finance-local provider config', () => {
       'csi2000_ice_check',
       'csi300_analysis',
       'dragon_head',
+      'dragon_history',
       'journal_append',
+      'journal_recent',
       'macro_snapshot',
       'market_dashboard',
       'market_data_refresh',
@@ -409,6 +411,49 @@ describe('readFinanceCharts', () => {
     expect(readFinanceCharts({ version: 1, series: 'price' }).series).toEqual([])
     expect(readFinanceCharts(null).series).toEqual([])
     expect(readFinanceCharts([]).series).toEqual([])
+  })
+})
+
+
+describe('history tools', () => {
+  it('maps journal_recent arguments and renders the compact journal Markdown', async () => {
+    const { ctx } = await boot()
+    queue = [success('journal_recent', {
+      entries: [{ kind: 'core', date: '2026-10-23', summary: '空仓观望' }],
+      journal_markdown: '- **2026-10-23 · 核心**：空仓观望\n  - 计划：等 MA10',
+    })]
+    const result = await call(ctx, 'journal_recent', { limit: 3, kind: 'core' })
+    expect(result.isError).toBe(false)
+    expect(specs[0]?.request).toMatchObject({ operation: 'journal_recent', arguments: { limit: 3, kind: 'core' } })
+    expect(result.text).toContain('2026-10-23 · 核心')
+    expect(result.text).toContain('计划：等 MA10')
+  })
+
+  it('maps dragon_history arguments and renders each review as one line', async () => {
+    const { ctx } = await boot()
+    queue = [success('dragon_history', {
+      entries: [{
+        date: '2026-10-23',
+        env: { strong: false },
+        sentiment: { limitup_total: 77, broken: 12, max_streak: 6 },
+        candidates: [{ code: '002181', name: '粤传媒' }],
+      }],
+    })]
+    const result = await call(ctx, 'dragon_history', { limit: 3 })
+    expect(result.isError).toBe(false)
+    expect(specs[0]?.request).toMatchObject({ operation: 'dragon_history', arguments: { limit: 3 } })
+    expect(result.text).toContain('2026-10-23')
+    expect(result.text).toContain('龙头闸门否决')
+    expect(result.text).toContain('粤传媒(002181)')
+  })
+
+  it('passes include_history to the dashboard', async () => {
+    const { ctx } = await boot()
+    queue = [success('dashboard', { report_markdown: '# 日报' })]
+    const result = await call(ctx, 'market_dashboard', { include_history: false })
+    expect(result.isError).toBe(false)
+    expect(specs[0]?.request).toMatchObject({ operation: 'dashboard', arguments: { include_history: false } })
+    expect(result.text).toContain('# 日报')
   })
 })
 
