@@ -17,9 +17,9 @@ import { en, zh } from '../src/client/locales.ts'
 const SUBS = SCENARIOS.flatMap(scenario => scenario.subs)
 
 describe('the scenario taxonomy', () => {
-  it('carries three scenarios with nineteen sub-scenarios between them', () => {
+  it('carries three scenarios with twenty sub-scenarios between them', () => {
     expect(SCENARIOS.map(scenario => scenario.id)).toEqual(['office', 'code', 'design'])
-    expect(SUBS).toHaveLength(19)
+    expect(SUBS).toHaveLength(20)
     // Every chip is addressable by a unique id inside its own row.
     for (const scenario of SCENARIOS) {
       expect(new Set(scenario.subs.map(sub => sub.id)).size).toBe(scenario.subs.length)
@@ -34,11 +34,12 @@ describe('the scenario taxonomy', () => {
   it('names an agent preset only where a capability backs the pick', () => {
     // Finance, slides, video, and Xiaohongshu are the sub-scenarios whose pick
     // reaches an agent instead of only writing a starter; the rest stay as they were.
-    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['finance', 'slides', 'video', 'xhs'])
+    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['finance', 'slides', 'video', 'xhs', 'motion'])
     expect(SUBS.find(sub => sub.id === 'finance')?.presetId).toBe('finance')
     expect(SUBS.find(sub => sub.id === 'video')?.presetId).toBe('video')
     expect(SUBS.find(sub => sub.id === 'xhs')?.presetId).toBe('xiaohongshu')
     expect(SUBS.find(sub => sub.id === 'slides')?.presetId).toBe('ppt')
+    expect(SUBS.find(sub => sub.id === 'motion')?.presetId).toBe('motion')
   })
 
   it('carries video generation under the design scenario rather than office', () => {
@@ -47,6 +48,7 @@ describe('the scenario taxonomy', () => {
     expect(scenarioById('office')?.subs.map(sub => sub.id)).not.toContain('video')
     expect(scenarioById('design')?.subs.map(sub => sub.id)).toContain('video')
     expect(scenarioById('design')?.subs.map(sub => sub.id)).toContain('xhs')
+    expect(scenarioById('design')?.subs.map(sub => sub.id)).toContain('motion')
   })
 
   it('keeps slide decks in office alone now that the design row has no deck entry', () => {

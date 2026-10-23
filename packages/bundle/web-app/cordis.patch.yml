@@ -87,6 +87,9 @@
     # `projectRoot` here or in a profile patch.
     - id: video-local
       name: '@deepseek-ai/dsh-video-local'
+    - id: motion-local
+      name: '@deepseek-ai/dsh-motion-local'
+      disabled: true
 
     # Xiaohongshu post packaging behind the 小红书创作 agent preset. The manual
     # and asset directories have personal defaults; this row serves the finished
@@ -474,6 +477,8 @@
       name: '@deepseek-ai/dsh-client-ui-xhs-view'
     - id: ui-ppt-view
       name: '@deepseek-ai/dsh-client-ui-ppt-view'
+    - id: ui-motion-view
+      name: '@deepseek-ai/dsh-client-ui-motion-view'
 
     - id: ui-settings-session-log
       name: '@deepseek-ai/dsh-client-ui-settings-session-log'
