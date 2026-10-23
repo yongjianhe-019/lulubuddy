@@ -532,6 +532,21 @@ def _pick_sections(sections: list[tuple[str, str]], *keywords: str) -> str:
     return "\n\n".join(part for part in picked if part).strip()
 
 
+def _dragon_lines(text: str) -> str:
+    """Keep the performance lines from a review: T+1/T+3 samples and win rates."""
+    performance: list[str] = []
+    context: list[str] = []
+    for line in text.splitlines():
+        clean = line.strip().lstrip("-* ").strip()
+        if not clean:
+            continue
+        if any(word in clean for word in ("T+1", "T+3", "T+5", "全样本", "可买", "胜率", "均值")):
+            performance.append(clean)
+        elif "龙头" in clean and ("跟踪" in clean or "候选" in clean):
+            context.append(clean)
+    return _clip(_plain("；".join((performance or context)[:5])), 900)
+
+
 def _journal_entry(kind: str, heading: str, body: str) -> dict[str, Any]:
     """Convert one journal entry into the compact shape the analysis prompt reads."""
     match = re.match(r"(\d{4}-\d{2}-\d{2})", heading)
@@ -549,6 +564,7 @@ def _journal_entry(kind: str, heading: str, body: str) -> dict[str, Any]:
         "conclusion": _clip(conclusion, 1600),
         "plan": _clip(plan, 1400),
         "review": _clip(review, 1400),
+        "dragon_tracking": _dragon_lines(body),
         "excerpt": _clip(body, 3000),
     }
 
@@ -571,6 +587,7 @@ def _daily_entry(path: Path) -> dict[str, Any]:
         "signals": _clip(signals, 1600),
         "plan": _clip(plan, 1600),
         "review": _clip(review, 1600),
+        "dragon_tracking": _dragon_lines(text),
         "excerpt": _clip(text, 5000),
     }
 
@@ -606,6 +623,19 @@ def _compact_review(review: str) -> str:
     return "；".join(points)
 
 
+def _dedupe_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the most complete entry for each (kind, date), dropping empty re-appends."""
+    best: dict[tuple[str, str], dict[str, Any]] = {}
+    for entry in entries:
+        key = (str(entry.get("kind") or ""), str(entry.get("date") or ""))
+        score = len(str(entry.get("review") or "")) + len(str(entry.get("plan") or "")) + len(str(entry.get("summary") or ""))
+        current = best.get(key)
+        current_score = -1 if current is None else len(str(current.get("review") or "")) + len(str(current.get("plan") or "")) + len(str(current.get("summary") or ""))
+        if score > current_score:
+            best[key] = entry
+    return list(best.values())
+
+
 def _journal_markdown(entries: list[dict[str, Any]]) -> str:
     """Render compact journal entries as a readable Markdown appendix."""
     labels = {"core": "核心", "satellite": "卫星", "daily": "日报"}
@@ -622,6 +652,9 @@ def _journal_markdown(entries: list[dict[str, Any]]) -> str:
         review = _plain(_compact_review(str(entry.get("review") or "")))
         if review:
             lines.append(f"- 复盘：{_clip(review, 360)}")
+        dragon = _plain(str(entry.get("dragon_tracking") or ""))
+        if dragon:
+            lines.append(f"- 龙头跟踪：{_clip(dragon, 500)}")
         blocks.append("\n".join(lines))
     return "\n\n".join(blocks)
 
@@ -643,17 +676,24 @@ def op_dashboard(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], 
     report_markdown = dashboard.report.render_markdown(snapshot)
     warnings = _data_warnings(data)
     history: list[dict[str, Any]] = []
+    strategy: dict[str, Any] = {}
     if arguments.get("include_history", True):
         history_document, history_warnings, _ = op_journal_recent({"limit": 3, "kind": "all"})
         history = history_document.get("entries") or []
         warnings.extend(history_warnings)
+        strategy_document, strategy_warnings = _strategy_progress()
+        strategy = {**strategy_document, "entries": (strategy_document.get("entries") or [])[:2]}
+        warnings.extend(strategy_warnings)
+        if strategy.get("entries") or strategy.get("status"):
+            report_markdown += "\n\n## 七、核心迭代\n\n" + _strategy_markdown(strategy, 2)
         if history:
-            report_markdown += "\n\n## 七、近期分析对照\n\n" + _journal_markdown(history)
+            report_markdown += "\n\n## 八、近期分析对照\n\n" + _journal_markdown(history)
     document = {
         "ratio": _jsonable(ratio),
         **snapshot,
         "report_markdown": report_markdown,
         "history": history,
+        "strategy": strategy,
     }
     if arguments.get("record"):
         try:
@@ -801,6 +841,57 @@ def op_journal_append(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[s
 
 
 
+
+
+def _strategy_progress() -> tuple[dict[str, Any], list[str]]:
+    """Read the project's iteration log, newest iteration notes first."""
+    path = _stock_market_root() / "strategy" / "00-project-progress.md"
+    if not path.is_file():
+        return {"available": False, "entries": []}, ["strategy/00-project-progress.md unavailable"]
+    try:
+        text = path.read_text(encoding="utf-8")
+    except Exception as error:  # noqa: BLE001 - the log is context, not a fake signal
+        return {"available": False, "entries": []}, [f"strategy progress unreadable: {error}"]
+    sections = _sections(text, "##")
+    status = next((body for heading, body in sections if "项目状态" in heading), "")
+    entries: list[dict[str, Any]] = []
+    for heading, body in sections:
+        match = re.match(r"(\d{4}-\d{2}-\d{2})\s*(.*)", heading)
+        if match is None:
+            continue
+        flat = re.sub(r"^#{1,6}\s*", "", body, flags=re.MULTILINE)
+        flat = re.sub(r"^---+\s*$", "", flat, flags=re.MULTILINE)
+        flat = re.sub(r"\s+", " ", flat).strip()
+        entries.append({
+            "date": match.group(1),
+            "title": match.group(2).strip(),
+            "summary": _clip(_plain(flat), 1200),
+            "excerpt": _clip(body, 3000),
+        })
+    entries.sort(key=lambda entry: str(entry.get("date") or ""), reverse=True)
+    updated = next((line.split(":", 1)[1].strip() for line in text.splitlines() if line.startswith("> 最后更新:")), "")
+    return {
+        "available": True,
+        "updated_at": updated,
+        "status": _clip(_plain(status), 1200),
+        "entries": entries,
+        "path": str(path),
+    }, []
+
+
+def _strategy_markdown(document: dict[str, Any], limit: int) -> str:
+    """Render the recent iteration notes as a short, scannable appendix."""
+    lines: list[str] = []
+    if document.get("updated_at"):
+        lines.append(f"最后更新：{document['updated_at']}")
+    if document.get("status"):
+        lines.append(f"- 当前状态：{document['status']}")
+    for entry in (document.get("entries") or [])[:limit]:
+        summary = _plain(re.sub(r"\s+", " ", str(entry.get("summary") or ""))).strip()
+        lines.append(f"- **{entry.get('date')} · {entry.get('title') or '迭代'}**：{_clip(summary, 260)}")
+    return "\n".join(lines)
+
+
 def op_journal_recent(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
     """Read the most recent core, satellite, and daily analysis records."""
     try:
@@ -844,6 +935,7 @@ def op_journal_recent(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[s
                 except Exception as error:  # noqa: BLE001 - one damaged day must not hide the rest
                     warnings.append(f"{path.name} unreadable: {error}")
 
+    entries = _dedupe_entries(entries)
     entries.sort(key=lambda entry: str(entry.get("date") or ""), reverse=True)
     entries = entries[:limit]
     if not include_text:
@@ -898,16 +990,77 @@ def op_dragon_history(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[s
     return document, warnings, _charts([])
 
 
+
+
+
+
+def op_dragon_track(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Read the dragon follow-up ledger and compute T+1/T+3/T+5/T+10 stats."""
+    try:
+        limit = max(1, min(100, int(arguments.get("limit", 20))))
+    except (TypeError, ValueError) as error:
+        raise RuntimeError("dragon track limit must be an integer") from error
+    path = _stock_market_root() / "dragon_head" / "data" / "dragon_track.csv"
+    if not path.is_file():
+        return {"available": False, "rows": [], "stats": {}}, ["dragon_track.csv unavailable"], _charts([])
+    try:
+        import pandas as pd
+        frame = pd.read_csv(path)
+    except Exception as error:  # noqa: BLE001 - a damaged ledger is reported, not hidden
+        return {"available": False, "rows": [], "stats": {}}, [f"dragon track unreadable: {error}"], _charts([])
+    buyable = frame[~frame["entry_unbuyable"].fillna(False).astype(bool)] if "entry_unbuyable" in frame else frame
+    stats: dict[str, Any] = {}
+    for horizon, column in (("t1", "t1_ret"), ("t3", "t3_ret"), ("t5", "t5_ret"), ("t10", "t10_ret")):
+        if column not in buyable:
+            continue
+        values = pd.to_numeric(buyable[column], errors="coerce").dropna()
+        by_source: dict[str, Any] = {}
+        if "source" in buyable:
+            for source, group in buyable.groupby("source"):
+                series = pd.to_numeric(group[column], errors="coerce").dropna()
+                if len(series) > 0:
+                    by_source[str(source)] = {
+                        "n": int(len(series)),
+                        "win_rate": round(float((series > 0).mean()), 4),
+                        "mean": round(float(series.mean()), 4),
+                    }
+        stats[horizon] = {
+            "n": int(len(values)),
+            "win_rate": round(float((values > 0).mean()), 4) if len(values) > 0 else None,
+            "mean": round(float(values.mean()), 4) if len(values) > 0 else None,
+            "by_source": by_source,
+        }
+    rows = _jsonable(frame.tail(limit).to_dict(orient="records"))
+    document = {"available": True, "path": str(path), "rows": rows, "stats": stats, "total": int(len(frame))}
+    return document, [], _charts([])
+
+
+def op_strategy_recent(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    """Read the latest core iteration notes from strategy/00-project-progress.md."""
+    try:
+        limit = max(1, min(5, int(arguments.get("limit", 2))))
+    except (TypeError, ValueError) as error:
+        raise RuntimeError("strategy limit must be an integer") from error
+    document, warnings = _strategy_progress()
+    if document.get("available"):
+        document["entries"] = (document.get("entries") or [])[:limit]
+        document["markdown"] = _strategy_markdown(document, limit)
+    document["limit"] = limit
+    return document, warnings, _charts([])
+
+
 def op_strategy_doc(arguments: dict[str, Any]) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
     """Read one whitelisted StockMarket strategy document for the mindset layer."""
     names = {
         "mindset": "strategy/03-交易心法.md",
         "progress": "strategy/00-project-progress.md",
+        "model": "strategy/02-model-design.md",
+        "etf": "strategy/01-ETF-left-side-season-scoring-model.md",
         "readme": "README.md",
     }
     name = arguments.get("name", "mindset")
     if name not in names:
-        raise RuntimeError("strategy doc name must be mindset, progress, or readme")
+        raise RuntimeError("strategy doc name must be mindset, progress, model, etf, or readme")
     path = _stock_market_root() / names[name]
     try:
         text = path.read_text(encoding="utf-8")
@@ -931,6 +1084,8 @@ OPERATIONS: dict[str, Callable[[dict[str, Any]], tuple[dict[str, Any], list[str]
     "journal_recent": op_journal_recent,
     "dragon_history": op_dragon_history,
     "strategy_doc": op_strategy_doc,
+    "strategy_recent": op_strategy_recent,
+    "dragon_track": op_dragon_track,
 }
 
 

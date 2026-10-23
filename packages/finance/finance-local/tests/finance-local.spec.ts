@@ -216,6 +216,7 @@ describe('finance-local provider config', () => {
       'csi300_analysis',
       'dragon_head',
       'dragon_history',
+      'dragon_track',
       'journal_append',
       'journal_recent',
       'macro_snapshot',
@@ -225,6 +226,7 @@ describe('finance-local provider config', () => {
       'opportunity_radar',
       'positions_snapshot',
       'strategy_doc',
+      'strategy_recent',
     ])
   })
 
@@ -427,6 +429,33 @@ describe('history tools', () => {
     expect(specs[0]?.request).toMatchObject({ operation: 'journal_recent', arguments: { limit: 3, kind: 'core' } })
     expect(result.text).toContain('2026-10-23 · 核心')
     expect(result.text).toContain('计划：等 MA10')
+  })
+
+  it('maps dragon_track and renders the horizon aggregates', async () => {
+    const { ctx } = await boot()
+    queue = [success('dragon_track', {
+      rows: [{ signal_date: '2026-10-20', name: '移远通信', code: '603236', t1_ret: 0.0733, t3_ret: 0.0351, status: 'tracking' }],
+      stats: { t1: { n: 14, win_rate: 0.6429, mean: 0.0189, by_source: { review: { n: 13, win_rate: 0.6923, mean: 0.0234 } } } },
+    })]
+    const result = await call(ctx, 'dragon_track', { limit: 5 })
+    expect(result.isError).toBe(false)
+    expect(specs[0]?.request).toMatchObject({ operation: 'dragon_track', arguments: { limit: 5 } })
+    expect(result.text).toContain('可买 14 只')
+    expect(result.text).toContain('64%')
+    expect(result.text).toContain('移远通信(603236)')
+  })
+
+  it('maps strategy_recent and renders the iteration notes', async () => {
+    const { ctx } = await boot()
+    queue = [success('strategy_recent', {
+      updated_at: '2026-10-20',
+      markdown: '最后更新：2026-10-20\n- **2026-10-23 · 迭代笔记**：统一龙头',
+    })]
+    const result = await call(ctx, 'strategy_recent', { limit: 2 })
+    expect(result.isError).toBe(false)
+    expect(specs[0]?.request).toMatchObject({ operation: 'strategy_recent', arguments: { limit: 2 } })
+    expect(result.text).toContain('2026-10-23')
+    expect(result.text).toContain('统一龙头')
   })
 
   it('maps dragon_history arguments and renders each review as one line', async () => {

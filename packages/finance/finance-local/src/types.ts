@@ -31,6 +31,8 @@ export type FinanceOperation =
   | 'journal_recent'
   | 'dragon_history'
   | 'strategy_doc'
+  | 'strategy_recent'
+  | 'dragon_track'
 
 /** Each operation's arguments, keyed by operation. */
 export interface FinanceRequestMap {
@@ -61,7 +63,11 @@ export interface FinanceRequestMap {
   /** Read the latest N dragon-head daily reviews. */
   readonly dragon_history: { readonly limit?: number; readonly as_of?: string }
   /** Read one whitelisted StockMarket strategy document. */
-  readonly strategy_doc: { readonly name?: 'mindset' | 'progress' | 'readme' }
+  readonly strategy_doc: { readonly name?: 'mindset' | 'progress' | 'model' | 'etf' | 'readme' }
+  /** Read the latest core iteration notes. */
+  readonly strategy_recent: { readonly limit?: number }
+  /** Read the dragon follow-up ledger and its horizon stats. */
+  readonly dragon_track: { readonly limit?: number }
 }
 
 /** One fully-specified capability request: an operation and its own arguments. */

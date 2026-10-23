@@ -3,7 +3,7 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/finance/finance-local/README.md
 /:
-  en: 33f7e20a468eeba1
+  en: b794b504aee4e80f
   zh: 8b37e437b3c8ea27
 /deepseek-ai-dsh-finance-local:
   en: f1dbaef8e6830f5d
@@ -27,8 +27,8 @@
   en: 9f97702f087ba1bd
   zh: 591afc6de316f95c
 /deepseek-ai-dsh-finance-local/use-this-package/the-tools:
-  en: 0225d5fba8424a8d
-  zh: 91d2c5933f6d7d4f
+  en: 8bb33d61d5af0f40
+  zh: b608a427d7dae354
 /deepseek-ai-dsh-finance-local/use-this-package/failures-and-recovery:
   en: f51b436b0d071f3c
   zh: f6e3684585beebe4
@@ -42,8 +42,8 @@
   en: 8b560fb9b3bf084d
   zh: 2875df1b44b12cd9
 /deepseek-ai-dsh-finance-local/understand-the-implementation/source-map:
-  en: b97daf6f85804a95
-  zh: 1b45ffd3f586323e
+  en: 4df52eb0039ffad7
+  zh: 19c1c6d74b88029c
 /deepseek-ai-dsh-finance-local/understand-the-implementation/read-path:
   en: 7647f36943d7eced
   zh: d4461bbd685f384d
@@ -57,8 +57,8 @@
   en: 59bd7715039e05fc
   zh: 965f9c1782f041f3
 /deepseek-ai-dsh-finance-local/model-experience/model-facing-tools/what-the-model-sees:
-  en: f5f132d54b04970f
-  zh: ec1d31a377519852
+  en: cc745ddd1f373d0f
+  zh: 0ca229e2767e33ec
 /deepseek-ai-dsh-finance-local/model-experience/model-facing-tools/token-effect:
   en: ac08e69b394b8b9b
   zh: 5cbd8d4f0009ce56

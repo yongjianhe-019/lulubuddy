@@ -1,5 +1,5 @@
 ---
-description: "The financial-market analysis capability (ctx.finance): a Python-backed provider over the StockMarket project plus the fourteen model-facing market, index, timing, macro, dashboard, opportunity, dragon-head, position, journal, and history tools an agent preset mounts."
+description: "The financial-market analysis capability (ctx.finance): a Python-backed provider over the StockMarket project plus the sixteen model-facing market, index, timing, macro, dashboard, opportunity, dragon-head, position, journal, and history tools an agent preset mounts."
 kind: "package-reference"
 ---
 
@@ -84,7 +84,9 @@ The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-a
 | `journal_append` | Append one analysis entry to the core or satellite trade journal |
 | `journal_recent` | Recent core, satellite, and daily analysis records with the previous plan, trigger gaps, and review |
 | `dragon_history` | The latest N dragon-head daily reviews, newest first, plus the tracked candidate ledger |
-| `strategy_doc` | Read the mindset, progress, or readme document from the project |
+| `dragon_track` | The dragon follow-up ledger with T+1/T+3/T+5/T+10 win rate and mean, split by review vs pullback |
+| `strategy_doc` | Read the mindset, progress, model design, ETF model, or readme document from the project |
+| `strategy_recent` | The current model status and the latest core iteration notes |
 
 Every analysis tool runs the documented incremental pre-step first (`fetch_all_data`/`fetch_all_macro` with `force=False`), so a cache written today is reused and only stale series are downloaded. `market_data_refresh` exists to make that step explicit before a first analysis.
 
@@ -118,7 +120,7 @@ Each invocation is one short-lived interpreter process, not a service: the provi
 | [`src/service.ts`](src/service.ts) | The `FinanceRuntime` Service Definition and the invocation vocabulary |
 | [`src/types.ts`](src/types.ts) | Operations, per-operation arguments, and the outcome document |
 | [`src/provider.ts`](src/provider.ts) | Process-per-invocation provider, response decoding, bounds, cancellation |
-| [`src/tools.ts`](src/tools.ts) | The `tools` entry: the fourteen model-facing tools, their JSON presentation, and their own mount over `ctx.finance` |
+| [`src/tools.ts`](src/tools.ts) | The `tools` entry: the sixteen model-facing tools, their JSON presentation, and their own mount over `ctx.finance` |
 | [`python/finance_bridge.py`](python/finance_bridge.py) | stdin/stdout JSON dispatcher over the analysis project |
 | — | No runtime invariant companion is published; the package owns no independently observable relation beyond the seam contract, and its bounds are enforced in the provider. |
 
@@ -149,7 +151,7 @@ Read these pages when the package-level contract is not enough. They move from t
 
 #### What the model sees
 
-The model sees the fourteen schemas above, and only in a session composed from a preset that mounts the `tools` entry; `market_data_refresh` carries its optional `force` argument. Data-source paths, interpreter, bounds, and the bridge protocol are not model-visible.
+The model sees the sixteen schemas above, and only in a session composed from a preset that mounts the `tools` entry; `market_data_refresh` carries its optional `force` argument. Data-source paths, interpreter, bounds, and the bridge protocol are not model-visible.
 
 #### Token effect
 

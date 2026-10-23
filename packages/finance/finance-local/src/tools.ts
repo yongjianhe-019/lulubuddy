@@ -164,6 +164,59 @@ function renderDragonHistory(value: Record<string, JsonValue>): string {
   return parts.join('\n\n')
 }
 
+
+/** Render the recent core iteration log as readable Markdown. */
+function renderStrategy(value: Record<string, JsonValue>): string {
+  const document = objectOf(value)
+  const warnings = Array.isArray(value['warnings']) ? value['warnings'] : []
+  const parts: string[] = []
+  if (warnings.length > 0) parts.push(`Data warnings:\n${warnings.map(renderWarning).map(item => `- ${item}`).join('\n')}`)
+  const markdown = stringOf(document?.['markdown'])
+  parts.push(markdown === '' ? 'No recent iteration notes.' : markdown)
+  return parts.join('\n\n')
+}
+
+
+/** Render the dragon follow-up ledger with its T+1/T+3 aggregates. */
+function renderDragonTrack(value: Record<string, JsonValue>): string {
+  const document = objectOf(value)
+  const warnings = Array.isArray(value['warnings']) ? value['warnings'] : []
+  const parts: string[] = []
+  if (warnings.length > 0) parts.push(`Data warnings:\n${warnings.map(renderWarning).map(item => `- ${item}`).join('\n')}`)
+  const stats = objectOf(document?.['stats'])
+  const lines = ['## 龙头跟踪台账', '']
+  for (const [label, key, limit] of [['T+1', 't1', 3], ['T+3', 't3', 3], ['T+5', 't5', 3], ['T+10', 't10', 3]] as const) {
+    const row = objectOf(stats?.[key])
+    if (row === null) continue
+    const n = typeof row['n'] === 'number' ? row['n'] : 0
+    if (n === 0) continue
+    const win = typeof row['win_rate'] === 'number' ? `${(row['win_rate'] * 100).toFixed(0)}%` : '—'
+    const mean = typeof row['mean'] === 'number' ? `${(row['mean'] * 100).toFixed(2)}%` : '—'
+    lines.push(`- ${label}：可买 ${String(n)} 只，胜率 ${win}，均值 ${mean}`)
+    const sources = objectOf(row['by_source'])
+    for (const [source, sourceValue] of Object.entries(sources ?? {}).slice(0, limit)) {
+      const sourceRow = objectOf(sourceValue)
+      if (sourceRow === null) continue
+      const sourceWin = typeof sourceRow['win_rate'] === 'number' ? `${(sourceRow['win_rate'] * 100).toFixed(0)}%` : '—'
+      const sourceMean = typeof sourceRow['mean'] === 'number' ? `${(sourceRow['mean'] * 100).toFixed(2)}%` : '—'
+      lines.push(`  - ${source}：n=${String(sourceRow['n'] ?? '—')}，胜率 ${sourceWin}，均值 ${sourceMean}`)
+    }
+  }
+  const rows = Array.isArray(document?.['rows']) ? document['rows'] : []
+  if (rows.length > 0) {
+    lines.push('', '最近台账：')
+    for (const item of rows.slice(-8)) {
+      const row = objectOf(item)
+      if (row === null) continue
+      const t1 = typeof row['t1_ret'] === 'number' ? `${(row['t1_ret'] * 100).toFixed(1)}%` : '—'
+      const t3 = typeof row['t3_ret'] === 'number' ? `${(row['t3_ret'] * 100).toFixed(1)}%` : '—'
+      lines.push(`- ${stringOf(row['signal_date'])} ${stringOf(row['name'])}(${stringOf(row['code'])}) · T+1 ${t1} · T+3 ${t3} · ${stringOf(row['status'])}`)
+    }
+  }
+  parts.push(lines.join('\n'))
+  return parts.join('\n\n')
+}
+
 /** The shared open-object output spec: every finance document is one JSON object. */
 const DOCUMENT_SCHEMA = { type: 'object', additionalProperties: true } as const
 
@@ -239,7 +292,7 @@ export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, time
 
   ctx.tools.register(defineTool({
     name: 'market_dashboard',
-    description: 'Build the project\'s full daily snapshot in one call: the core CSI 300 and CSI 2000 actions, the next trigger, the satellite opportunity radar, the dragon-head gate, the human-maintained positions, the current plan, the three most recent journal entries, and any degraded data panels. Use this for a daily review or any question that spans several engines. Set record to true only when the user wants the project\'s daily journal and machine-readable record written.',
+    description: 'Build the project\'s full daily snapshot in one call: the core CSI 300 and CSI 2000 actions, the next trigger, the satellite opportunity radar, the dragon-head gate, the human-maintained positions, the current plan, the two most recent core-iteration notes, the three most recent journal entries, and any degraded data panels. Use this for a daily review or any question that spans several engines. Set record to true only when the user wants the project\'s daily journal and machine-readable record written.',
     parameters: {
       force: { type: 'boolean', description: 'Refetch every series instead of reusing today\'s cache. Defaults to false.' },
       record: { type: 'boolean', description: 'Write the project\'s daily journal and machine-readable record. Defaults to false; ask before writing.' },
@@ -378,6 +431,26 @@ export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, time
     },
   }))
 
+
+  ctx.tools.register(defineTool({
+    name: 'dragon_track',
+    description: 'Read the dragon follow-up ledger and compute T+1/T+3/T+5/T+10 win rate and mean for buyable candidates, split by review vs pullback. Use this when the user asks about historical dragon tracking, whether candidates worked, or the gate\'s opportunity cost. It reads the project\'s dragon_track.csv, not a live scan.',
+    parameters: {
+      limit: { type: 'number', description: 'Rows to return from the recent ledger, 1-100. Defaults to 20.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderDragonTrack(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'dragon_track',
+        arguments: { ...args.limit === undefined ? {} : { limit: args.limit } },
+      }, exec.signal))
+    },
+  }))
+
   ctx.tools.register(defineTool({
     name: 'positions_snapshot',
     description: 'Read the human-maintained positions file and the satellite radar state. Call it before any advice that depends on what is held: a cleared position must not receive a trim recommendation, and a new buy is only suggested when the gate opens.',
@@ -415,11 +488,31 @@ export function registerFinanceTools(ctx: Context, finance: FinanceRuntime, time
     },
   }))
 
+
+  ctx.tools.register(defineTool({
+    name: 'strategy_recent',
+    description: 'Read the latest core iteration notes from strategy/00-project-progress.md: the current model status and the most recent changes. Call this before a non-dashboard analysis so the judgment reflects the latest model iteration, not only the current data. market_dashboard already includes the two most recent notes.',
+    parameters: {
+      limit: { type: 'number', description: 'Maximum iteration notes to return, 1-5. Defaults to 2.' },
+    },
+    output: {
+      schema: DOCUMENT_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: renderStrategy(value) }],
+    },
+    timeoutMs,
+    async execute(args, exec) {
+      return toolValue(await finance.invoke({
+        operation: 'strategy_recent',
+        arguments: { ...args.limit === undefined ? {} : { limit: args.limit } },
+      }, exec.signal))
+    },
+  }))
+
   ctx.tools.register(defineTool({
     name: 'strategy_doc',
-    description: 'Read one whitelisted StockMarket strategy document: mindset (the scenario-to-mindset map), progress (the model iteration log), or readme (the project overview). Use mindset as an annotation layer only; it never changes a model signal or produces a trade.',
+    description: 'Read one whitelisted StockMarket strategy document: mindset (the scenario-to-mindset map), progress (the model iteration log), model (the model design), etf (the ETF scoring model), or readme (the project overview). Use mindset as an annotation layer only; it never changes a model signal or produces a trade.',
     parameters: {
-      name: { type: 'string', enum: ['mindset', 'progress', 'readme'], description: 'Document to read. Defaults to mindset.' },
+      name: { type: 'string', enum: ['mindset', 'progress', 'model', 'etf', 'readme'], description: 'Document to read. Defaults to mindset.' },
     },
     output: {
       schema: DOCUMENT_SCHEMA,
