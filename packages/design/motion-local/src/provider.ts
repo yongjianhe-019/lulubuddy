@@ -160,7 +160,9 @@ export class LocalMotionProvider extends MotionRuntime {
   }
 
   private async scaffold(args: MotionRequestMap['scaffold']): Promise<MotionOutcome> {
-    const platform = args.platform ?? (args.width !== undefined || args.height !== undefined ? 'custom' : 'mobile')
+    const platform = args.platform ?? (args.width !== undefined || args.height !== undefined
+      ? 'custom'
+      : args.template === 'orbital' ? 'desktop' : 'mobile')
     const defaults = platform === 'desktop'
       ? { width: 1920, height: 1080 }
       : platform === 'square'
@@ -178,7 +180,12 @@ export class LocalMotionProvider extends MotionRuntime {
     await mkdir(projectDir, { recursive: true })
     const htmlPath = join(projectDir, 'index.html')
     const bgmPath = join(projectDir, 'bgm.json')
-    const template = join(this.root, 'skill', 'motion-video', 'templates', 'motion.html')
+    const template = args.templatePath !== undefined
+      ? this.projectDir(args.templatePath)
+      : args.template === 'orbital'
+        ? join(this.root, 'examples', 'legacy', 'orbital-20s.html')
+        : join(this.root, 'skill', 'motion-video', 'templates', 'motion.html')
+    if (!existsSync(template)) throw new Error(`motion-local: template not found: ${template}`)
     let html = await readFile(template, 'utf8')
     html = html.replace(
       /const W = \d+, H = \d+, FPS = \d+, DUR = [\d.]+;/u,
@@ -226,7 +233,7 @@ export class LocalMotionProvider extends MotionRuntime {
     return {
       document: {
         title: args.title, slug, projectDir, htmlPath, bgmPath, notesPath: notes,
-        width, height, fps, duration, bpm, platform, safeArea: safe,
+        width, height, fps, duration, bpm, platform, safeArea: safe, template: args.template ?? 'starter',
       },
       warnings: [],
     }

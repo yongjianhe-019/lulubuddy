@@ -109,8 +109,10 @@ export function registerMotionTools(ctx: Context, motion: MotionRuntime, timeout
       bpm: { type: 'number', description: 'Beats per minute. Defaults to 120.' },
       platform: {
         type: 'string', enum: ['mobile', 'desktop', 'square', 'portrait', 'custom'],
-        description: 'Delivery profile. mobile 1080x1920, desktop 1920x1080, square 1080x1080, portrait 1080x1350. Defaults to mobile.',
+        description: 'Delivery profile. mobile 1080x1920, desktop 1920x1080, square 1080x1080, portrait 1080x1350. Defaults to mobile, except orbital defaults to desktop.',
       },
+      template: { type: 'string', enum: ['starter', 'orbital'], description: 'Composition template. starter is the generic motion page; orbital is the legacy wireframe-globe scene. Defaults to starter.' },
+      templatePath: { type: 'string', description: 'Optional HTML template path relative to motionRoot. Overrides template.' },
       outputDir: { type: 'string', description: 'Project directory relative to motionRoot. Defaults to motion/<slug>.' },
     },
     output: {
@@ -129,6 +131,8 @@ export function registerMotionTools(ctx: Context, motion: MotionRuntime, timeout
         ...args.duration === undefined ? {} : { duration: args.duration },
         ...args.bpm === undefined ? {} : { bpm: args.bpm },
         ...args.platform === undefined ? {} : { platform: args.platform },
+        ...args.template === undefined ? {} : { template: args.template },
+        ...args.templatePath === undefined ? {} : { templatePath: args.templatePath },
         ...args.outputDir === undefined ? {} : { outputDir: args.outputDir },
       } }, exec.signal)
       return toolValue(outcome.document, outcome.warnings)

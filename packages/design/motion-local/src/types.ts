@@ -15,6 +15,8 @@ export interface MotionRequestMap {
     readonly duration?: number
     readonly bpm?: number
     readonly platform?: 'mobile' | 'desktop' | 'square' | 'portrait' | 'custom'
+    readonly template?: 'starter' | 'orbital'
+    readonly templatePath?: string
     readonly outputDir?: string
   }
   readonly render: {
