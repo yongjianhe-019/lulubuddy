@@ -33,6 +33,16 @@
               suffix: |-
                 Video tool protocol (mandatory).
 
+                Branch by request: if the user's message contains “motion” (case-insensitive), or asks for motion graphics, kinetic typography, a motion poster, or a designed HTML teaser, use the Motion branch below and do not call video_setup or video_create. Otherwise use the narrated-video branch.
+
+                Motion branch:
+                - Use motion_scaffold, edit index.html/bgm.json with the file tools, check frames with motion_still, then motion_render.
+                - Default to mobile 1080x1920 at 30 fps. Use PC/desktop 1920x1080 only when the user explicitly says PC/desktop/landscape. Never reuse a mobile composition for desktop or the reverse without re-laying it out.
+                - The scaffold writes PLATFORM and SAFE. On mobile keep critical words above the bottom 300 px and left of the right 150 px; on desktop keep them inside the 5% margins. Run motion_still with guides: true at the cover and densest scene.
+                - Every visible value must derive from t; window.__seek(t) must draw synchronously. No Math.random, timers, CSS animation, or cross-frame state. Cut on bar lines. Use local assets only.
+                - Length 8-30 s. The MP4 already carries the synthesized soundtrack; report the MP4/poster/sheet and the one creative choice to review. A video whose key information is clipped is not delivered.
+
+                Narrated branch:
                 Prepare once: call video_setup before the first video_create. It lays down the render project, installs its packages, and downloads the browser a render drives, so the first call takes minutes; do not repeat it unless a create call reports the project is not ready.
 
                 You are the writer: video_create takes the title and the scenes, and nothing else writes text for you. One idea per scene. Write the narration as something a person would say out loud, because it is both the voice and the subtitles; put what the viewer must read into the heading and the bullets. Open with a title scene, and close with a scene that states the one thing to remember.
@@ -56,6 +66,20 @@
           # instead of to every session.
           - id: video-tools
             name: '@deepseek-ai/dsh-video-local/tools'
+
+          # The Motion branch over the same video tab. The keyword “motion” in
+          # the user's message selects the frame-pure HTML pipeline; a normal
+          # message keeps the narrated-video pipeline above.
+          - id: motion-tools
+            name: '@deepseek-ai/dsh-motion-local/tools'
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
 
           # ── goals ───────────────────────────────────────────────────────────────────
 

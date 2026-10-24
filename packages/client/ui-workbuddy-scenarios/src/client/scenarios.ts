@@ -92,12 +92,6 @@ export const SCENARIOS: readonly Scenario[] = [
         templateKey: 'design.xhs.template',
         presetId: 'xiaohongshu',
       },
-      {
-        id: 'motion',
-        labelKey: 'design.motion',
-        templateKey: 'design.motion.template',
-        presetId: 'motion',
-      },
       { id: 'mobile', labelKey: 'design.mobile', templateKey: 'design.mobile.template' },
       { id: 'system', labelKey: 'design.system', templateKey: 'design.system.template' },
       { id: 'brand', labelKey: 'design.brand', templateKey: 'design.brand.template' },
