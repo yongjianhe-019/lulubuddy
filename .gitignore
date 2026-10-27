@@ -47,3 +47,8 @@ worktrees/
 .agents/worktrees/
 .typert-*/
 native/system/test/bin/
+
+# Local-only StockMarket integration (contains the user's data-source setup).
+/packages/finance/
+/packages/client/ui-finance-view/
+/packages/bundle/web-app/presets/finance.patch.yml

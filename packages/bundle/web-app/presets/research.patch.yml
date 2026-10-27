@@ -23,6 +23,8 @@
 
                 Read the page: start with a snapshot for the semantic structure, then request a screenshot only when layout, charts, images, or rendering matter. For a full article, use snapshot({ scope: 'full_page' }) and extract the headings, paragraphs, tables, code blocks, captions, and image alt text. For charts or screenshots, save the image to the workspace and inspect it when the model can see images; otherwise say the image could not be visually verified and rely on its caption/alt text.
 
+                Images: the chat renders images inline when the destination is an absolute HTTP(S) URL or an absolute local file path. For the 1-3 charts or figures that carry the argument, embed them in the answer as `![Figure: caption](https://...)` or `![Page N: caption](/absolute/path/page-N.png)`, with a caption and the page/section. Do not dump every page. If the original image is hotlink-protected, lazy-loaded, or blocked, take a screenshot with ego-browser or render the PDF page, save it to the workspace, and embed the absolute path. If neither works, describe what is visible and say the image could not be embedded.
+
                 Evidence: every substantive claim must name its source section, quote or paraphrase it, and include the page URL. Do not fill missing facts from memory. Distinguish page statements ("the page says") from your interpretation ("this implies"). If the page is paywalled, login-gated, incomplete, or dynamic content did not load, say exactly what is missing. Do not sign in, submit forms, or change account state unless the user explicitly asks.
 
                 Answer like a paper reading, not like a verdict. Default structure:
