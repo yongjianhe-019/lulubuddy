@@ -82,15 +82,11 @@ describe('the two-level scenario selector', () => {
     expect(startSession).toHaveBeenCalledWith('market')
   })
 
-  it('opens a session without seeding when the current one already ran', () => {
-    const { setDraft, startSession } = bench(false)
+  it('hides the picker in a committed session', () => {
+    bench(false)
 
-    fireEvent.click(chip(en['office.market']))
-
-    // A committed session keeps its composition, so the pick starts a new one
-    // and leaves the starter alone rather than stranding it in the old draft.
-    expect(setDraft).not.toHaveBeenCalled()
-    expect(startSession).toHaveBeenCalledWith('market')
+    expect(screen.queryByRole('button', { name: en['scenario.office'] })).toBeNull()
+    expect(screen.queryByRole('button', { name: en['office.market'] })).toBeNull()
   })
 
   it('steps the sub-scenario strip in both directions', () => {

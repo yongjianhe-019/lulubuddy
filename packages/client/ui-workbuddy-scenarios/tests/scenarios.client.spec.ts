@@ -32,9 +32,9 @@ describe('the scenario taxonomy', () => {
   })
 
   it('names an agent preset only where a capability backs the pick', () => {
-    // Finance, slides, video, and Xiaohongshu are the sub-scenarios whose pick
-    // reaches an agent instead of only writing a starter; the rest stay as they were.
-    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['market', 'research', 'slides', 'video', 'xhs'])
+    // Market, slides, research, video, and Xiaohongshu are the sub-scenarios whose
+    // pick reaches an agent instead of only writing a starter.
+    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['market', 'slides', 'research', 'video', 'xhs'])
     expect(SUBS.find(sub => sub.id === 'market')?.presetId).toBe('market')
     expect(SUBS.find(sub => sub.id === 'video')?.presetId).toBe('video')
     expect(SUBS.find(sub => sub.id === 'xhs')?.presetId).toBe('xiaohongshu')

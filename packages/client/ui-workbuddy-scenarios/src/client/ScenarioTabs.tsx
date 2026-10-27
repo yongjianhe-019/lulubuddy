@@ -53,6 +53,10 @@ const SCROLL_STEP = 240
  * @returns the selector element tree.
  */
 export function ScenarioTabs({ t, session, inputActions, startSession }: ScenarioTabsProps): ReactNode {
+  // The scenario picker belongs to the New Session surface. Once the Session
+  // has run a turn, its agent is already chosen and the chips would only
+  // compete with the conversation; a new Session brings them back.
+  if (!session.blank) return null
   // The selected scenario itself is the state, so no lookup can miss: the
   // only values that can be selected are the declared ones.
   const [scenario, setScenario] = useState<Scenario>(SCENARIOS[0] as Scenario)
