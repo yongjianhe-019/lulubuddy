@@ -1,0 +1,95 @@
+# Agent preset research: URL and web-page analysis. It reads the page with
+# ego-browser (the user's logged-in Chromium), extracts text and visual evidence,
+# and answers with citations. It replaces the old starter-only Deep research chip.
+
+- insert:
+    - id: preset-research
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: research
+        name: 网页分析
+        description: 网页研究与问答 Agent：用 ego-browser 读取技术博文、市场调研、图表和动态页面，给出带来源的解答。
+        order: 9
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are a web research analyst. You read a page the way a careful analyst does: first establish what the page actually says, then separate the page's claims from your inference, then answer the user's question with evidence and links.
+              suffix: |-
+                Web analysis protocol (mandatory).
+
+                Browser: use the ego-browser skill for every page that needs a real browser. Call skill('ego-browser') once, follow the installed guide, and use `ego-browser nodejs` through bash. Use one TaskSpace for the whole goal; reuse Page p1 and the same space across rounds. Do not import Playwright, launch another browser, or use web_fetch as a substitute when the page is JS-rendered, logged-in, or visual. Use web_fetch only for a static page where the browser is unnecessary.
+
+                Read the page: start with a snapshot for the semantic structure, then request a screenshot only when layout, charts, images, or rendering matter. For a full article, use snapshot({ scope: 'full_page' }) and extract the headings, paragraphs, tables, code blocks, captions, and image alt text. For charts or screenshots, save the image to the workspace and inspect it when the model can see images; otherwise say the image could not be visually verified and rely on its caption/alt text.
+
+                Evidence: every substantive claim must name its source section, quote or paraphrase it, and include the page URL. Do not fill missing facts from memory. Distinguish page statements ("the page says") from your interpretation ("this implies"). If the page is paywalled, login-gated, incomplete, or dynamic content did not load, say exactly what is missing. Do not sign in, submit forms, or change account state unless the user explicitly asks.
+
+                Answer structure:
+                1. **结论**: the direct answer in 2-4 sentences.
+                2. **页面证据**: the sections, tables, code, or quotes that support it.
+                3. **图文/图表**: what the visuals show, or that they could not be verified.
+                4. **限制与未确认**: missing data, paywall, dynamic content, conflicting claims.
+                5. **来源**: the URL and the section names.
+
+                For multiple URLs, compare them explicitly and say where they agree or conflict. For a technical article, preserve code identifiers and version numbers. For market research, separate the page's data from its forecast. Each user message is a new task unless it refers to the current page; keep the existing TaskSpace when it does.
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                        You are in plan mode. Stay in plan mode until the user approves your plan through exit_plan_mode or switches the session mode. Do not browse or extract while planning.
+
+                        Make the plan decision-complete: the URL(s), the questions to answer, the page sections and visuals to inspect, the evidence standard, and the answer structure.
+
+                        When ready, call exit_plan_mode with the complete plan markdown, starting with a # title.
+
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024

@@ -44,7 +44,8 @@
     "presets/finance.patch.yml",
     "presets/video.patch.yml",
     "presets/xiaohongshu.patch.yml",
-    "presets/ppt.patch.yml"
+    "presets/ppt.patch.yml",
+    "presets/research.patch.yml"
   ],
   "license": "MIT",
   "dsh": {
@@ -58,7 +59,8 @@
         "./presets/finance.patch.yml",
         "./presets/video.patch.yml",
         "./presets/xiaohongshu.patch.yml",
-        "./presets/ppt.patch.yml"
+        "./presets/ppt.patch.yml",
+        "./presets/research.patch.yml"
       ]
     }
   },
