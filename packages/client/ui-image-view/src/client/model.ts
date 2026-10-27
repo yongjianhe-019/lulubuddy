@@ -8,6 +8,7 @@ export interface ImageCardModel {
   readonly outputPath: string
   readonly caption: string
   readonly accent: string
+  readonly warnings: readonly string[]
 }
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -23,7 +24,9 @@ export function readImagePayload(meta: unknown): ImageCardModel | null {
   const sourcePath = text(root['sourcePath'])
   const outputPath = text(root['outputPath'])
   if (sourcePath === null || outputPath === null) return null
-  return { style, sourcePath, outputPath, caption: text(root['caption']) ?? '', accent: text(root['accent']) ?? '' }
+  const warnings: string[] = []
+  if (Array.isArray(root['warnings'])) for (const item of root['warnings']) if (typeof item === 'string') warnings.push(item)
+  return { style, sourcePath, outputPath, caption: text(root['caption']) ?? '', accent: text(root['accent']) ?? '', warnings }
 }
 
 export function modelFromBlock(block: ToolBlock): ImageCardModel | null {

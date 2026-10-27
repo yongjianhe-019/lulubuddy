@@ -106,7 +106,7 @@ def revival(source: Image.Image, output: Path, text: str, accent: str) -> None:
     color = cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
     sketch = cv2.cvtColor(sketch_bgr, cv2.COLOR_BGR2RGB)
     mixed = (color.astype(np.float32) * 0.62 + sketch.astype(np.float32) * 0.38).clip(0, 255).astype(np.uint8)
-    tile = Image.fromarray(mixed, "RGB").filter(ImageFilter.GaussianBlur(0.35))
+    tile = Image.fromarray(mixed, "RGB").filter(ImageFilter.UnsharpMask(radius=1.0, percent=110, threshold=2))
     tile.putalpha(torn_mask((size, size), 7))
     page.paste(tile, (118, 690), tile)
     draw = ImageDraw.Draw(page)
@@ -127,7 +127,7 @@ def pixel(source: Image.Image, output: Path, text: str, accent: str) -> None:
     photo = fit_photo(source, (size, size)).convert("L")
     # Fine bitmap print: downsample to a small grid and rebuild with nearest
     # neighbours, then overlay a dot matrix and scanlines.
-    small = photo.resize((92, 92), Image.Resampling.LANCZOS)
+    small = photo.resize((140, 140), Image.Resampling.LANCZOS)
     small = ImageEnhance.Contrast(small).enhance(1.35)
     bitmap = small.resize((size, size), Image.Resampling.NEAREST)
     arr = np.array(bitmap, dtype=np.uint8)
@@ -139,8 +139,8 @@ def pixel(source: Image.Image, output: Path, text: str, accent: str) -> None:
     tile = Image.fromarray(composed, "RGB")
     dots = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     dd = ImageDraw.Draw(dots)
-    for y in range(0, size, 7):
-        for x in range(0, size, 7):
+    for y in range(0, size, 5):
+        for x in range(0, size, 5):
             v = arr[y, x]
             if v < 120:
                 dd.ellipse((x, y, x + 2, y + 2), fill=(*ac, 70))
@@ -166,8 +166,8 @@ def zine(source: Image.Image, output: Path, text: str, accent: str) -> None:
     photo = ImageEnhance.Contrast(photo).enhance(1.3)
     # Halftone-ish posterization with a xerox softness and a riso offset.
     arr = np.array(photo, dtype=np.uint8)
-    arr = np.where(arr > 150, 245, np.where(arr > 90, 170, 55)).astype(np.uint8)
-    base = Image.fromarray(arr, "L").filter(ImageFilter.GaussianBlur(0.45)).convert("RGB")
+    arr = np.where(arr > 170, 245, np.where(arr > 115, 190, np.where(arr > 65, 125, 55))).astype(np.uint8)
+    base = Image.fromarray(arr, "L").filter(ImageFilter.GaussianBlur(0.2)).convert("RGB")
     ac = tuple(int(accent[i:i + 2], 16) for i in (1, 3, 5))
     layer = Image.new("RGB", size, ac)
     mask = np.array(base.convert("L"), dtype=np.uint8)
@@ -190,6 +190,9 @@ def main() -> int:
     request = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
     source = Image.open(request["source"]).convert("RGB")
     source = ImageOps.exif_transpose(source)
+    warnings = []
+    if min(source.size) < 800:
+        warnings.append(f"source image is only {source.width}x{source.height}; it is upscaled, so fine detail cannot be recovered — use a higher-resolution photo for print")
     style = request.get("style", "revival")
     if style not in ("revival", "pixel", "zine"):
         raise SystemExit(f"unknown style: {style}")
@@ -203,7 +206,7 @@ def main() -> int:
         pixel(source, output, text, accent)
     else:
         zine(source, output, text, accent)
-    print(json.dumps({"ok": True, "output": str(output), "style": style, "accent": accent}))
+    print(json.dumps({"ok": True, "output": str(output), "style": style, "accent": accent, "warnings": warnings}))
     return 0
 
 

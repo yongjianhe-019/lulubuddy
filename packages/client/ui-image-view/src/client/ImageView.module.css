@@ -16,3 +16,5 @@
 .download { border-color: var(--dsw-alias-label-primary); background: var(--dsw-alias-label-primary); color: var(--dsw-alias-bg-layer-1); }
 .note { margin: 0; font-size: 11px; line-height: 1.5; color: var(--dsw-alias-label-tertiary); }
 .raw { margin: 0; max-height: 180px; overflow: auto; font-size: 11px; white-space: pre-wrap; }
+
+.warnings { margin: 0; padding-left: 18px; font-size: 12px; color: #9a6b1f; }

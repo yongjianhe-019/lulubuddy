@@ -39,7 +39,13 @@ export function ImageView({ block, openFile, t }: ImageViewProps) {
       <div className={css.actions}>
         <a className={css.download} href={downloadHref(model.outputPath)} download={fileName(model.outputPath)}>{t('action.download')}</a>
         <button type="button" className={css.secondary} onClick={() => { openFile(model.sourcePath) }}>{t('action.source')}</button>
+        <button type="button" className={css.secondary} onClick={() => { openFile(model.outputPath) }}>{t('action.full')}</button>
       </div>
+      {model.warnings.length === 0 ? null : (
+        <ul className={css.warnings}>
+          {model.warnings.map(warning => <li key={warning}>{warning}</li>)}
+        </ul>
+      )}
       <p className={css.note}>{t('note.local')}</p>
     </section>
   )

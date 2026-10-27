@@ -12,6 +12,7 @@ export const zh = {
   'style.zine': '旧报纸',
   'action.download': '下载图片',
   'action.source': '打开原图',
+  'action.full': '查看大图',
   'note.local': '当前是本地 Pillow/OpenCV 风格化版本，不是 AI 重绘；接入图像模型后可直接升级。',
   'state.empty': '没有结果内容',
 } as const
@@ -28,6 +29,7 @@ export const en = {
   'style.zine': 'Zine paper',
   'action.download': 'Download image',
   'action.source': 'Open source',
+  'action.full': 'Open full size',
   'note.local': 'This is a local Pillow/OpenCV treatment, not an AI redraw; it can be upgraded when an image model is mounted.',
   'state.empty': 'No result content',
 } as const

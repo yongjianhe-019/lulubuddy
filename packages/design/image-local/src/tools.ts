@@ -44,6 +44,7 @@ interface RenderResult {
   readonly output: string
   readonly style: Style
   readonly accent: string
+  readonly warnings?: readonly string[]
 }
 
 async function render(
@@ -91,6 +92,7 @@ interface ImageValue extends Record<string, JsonValue> {
   readonly outputPath: string
   readonly caption: string
   readonly accent: string
+  readonly warnings: string[]
 }
 
 function result(value: ImageValue): string {
@@ -99,6 +101,7 @@ function result(value: ImageValue): string {
     `source: ${value.sourcePath}`,
     `output: ${value.outputPath}`,
     `caption: ${value.caption}`,
+    ...value.warnings.length === 0 ? [] : ['warnings:', ...value.warnings.map(warning => `- ${warning}`)],
     'renderer: local Pillow/OpenCV treatment; this is not an AI redraw.',
   ].join('\n')
 }
@@ -147,7 +150,7 @@ export function registerImageTools(ctx: Context): void {
       await mkdir(outputDir, { recursive: true })
       const outputPath = join(outputDir, `${style}.png`)
       const caption = args.caption ?? (style === 'revival' ? '我记得，那一天。' : style === 'pixel' ? '把生活，编码成一张数字印刷品。' : '把照片里的记忆，贴入一张安静的旧纸。')
-      await render(sourcePath, outputPath, style, caption, accent, exec.signal)
+      const rendered = await render(sourcePath, outputPath, style, caption, accent, exec.signal)
       const info = await stat(outputPath)
       return {
         style,
@@ -156,6 +159,7 @@ export function registerImageTools(ctx: Context): void {
         caption,
         accent,
         bytes: info.size,
+        warnings: [...rendered.warnings ?? []],
         renderer: 'local-pillow-opencv',
       }
     },
