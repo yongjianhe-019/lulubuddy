@@ -44,6 +44,7 @@
     "presets/video.patch.yml",
     "presets/xiaohongshu.patch.yml",
     "presets/ppt.patch.yml",
+    "presets/image.patch.yml",
     "presets/market.patch.yml",
     "presets/research.patch.yml"
   ],
@@ -59,6 +60,7 @@
         "./presets/video.patch.yml",
         "./presets/xiaohongshu.patch.yml",
         "./presets/ppt.patch.yml",
+        "./presets/image.patch.yml",
         "./presets/market.patch.yml",
         "./presets/research.patch.yml"
       ]
@@ -211,7 +213,9 @@
     "@deepseek-ai/dsh-motion-local": "workspace:*",
     "@deepseek-ai/dsh-client-ui-motion-view": "workspace:*",
     "@deepseek-ai/dsh-market-local": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-market-view": "workspace:*"
+    "@deepseek-ai/dsh-client-ui-market-view": "workspace:*",
+    "@deepseek-ai/dsh-image-local": "workspace:*",
+    "@deepseek-ai/dsh-client-ui-image-view": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:~",

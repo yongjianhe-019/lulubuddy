@@ -17,9 +17,9 @@ import { en, zh } from '../src/client/locales.ts'
 const SUBS = SCENARIOS.flatMap(scenario => scenario.subs)
 
 describe('the scenario taxonomy', () => {
-  it('carries three scenarios with nineteen sub-scenarios between them', () => {
+  it('carries three scenarios with twenty sub-scenarios between them', () => {
     expect(SCENARIOS.map(scenario => scenario.id)).toEqual(['office', 'code', 'design'])
-    expect(SUBS).toHaveLength(19)
+    expect(SUBS).toHaveLength(20)
     // Every chip is addressable by a unique id inside its own row.
     for (const scenario of SCENARIOS) {
       expect(new Set(scenario.subs.map(sub => sub.id)).size).toBe(scenario.subs.length)
@@ -34,10 +34,11 @@ describe('the scenario taxonomy', () => {
   it('names an agent preset only where a capability backs the pick', () => {
     // Market, slides, research, video, and Xiaohongshu are the sub-scenarios whose
     // pick reaches an agent instead of only writing a starter.
-    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['market', 'slides', 'research', 'video', 'xhs'])
+    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['market', 'slides', 'research', 'video', 'xhs', 'image'])
     expect(SUBS.find(sub => sub.id === 'market')?.presetId).toBe('market')
     expect(SUBS.find(sub => sub.id === 'video')?.presetId).toBe('video')
     expect(SUBS.find(sub => sub.id === 'xhs')?.presetId).toBe('xiaohongshu')
+    expect(SUBS.find(sub => sub.id === 'image')?.presetId).toBe('image')
     expect(SUBS.find(sub => sub.id === 'slides')?.presetId).toBe('ppt')
     expect(SUBS.find(sub => sub.id === 'research')?.presetId).toBe('research')
   })
@@ -48,6 +49,7 @@ describe('the scenario taxonomy', () => {
     expect(scenarioById('office')?.subs.map(sub => sub.id)).not.toContain('video')
     expect(scenarioById('design')?.subs.map(sub => sub.id)).toContain('video')
     expect(scenarioById('design')?.subs.map(sub => sub.id)).toContain('xhs')
+    expect(scenarioById('design')?.subs.map(sub => sub.id)).toContain('image')
   })
 
   it('keeps slide decks in office alone now that the design row has no deck entry', () => {
