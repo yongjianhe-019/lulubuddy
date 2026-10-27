@@ -73,24 +73,24 @@ describe('the two-level scenario selector', () => {
   it('opens a session on the sub-scenario preset, seeding the draft it reuses', () => {
     const { setDraft, startSession } = bench(true)
 
-    fireEvent.click(chip(en['office.finance']))
+    fireEvent.click(chip(en['office.market']))
 
     // The blank session is the one the New Session flow reuses, so the starter
     // lands in the composer the user is looking at while the agent changes
     // underneath it.
-    expect(setDraft).toHaveBeenCalledWith(en['office.finance.template'])
-    expect(startSession).toHaveBeenCalledWith('finance')
+    expect(setDraft).toHaveBeenCalledWith(en['office.market.template'])
+    expect(startSession).toHaveBeenCalledWith('market')
   })
 
   it('opens a session without seeding when the current one already ran', () => {
     const { setDraft, startSession } = bench(false)
 
-    fireEvent.click(chip(en['office.finance']))
+    fireEvent.click(chip(en['office.market']))
 
     // A committed session keeps its composition, so the pick starts a new one
     // and leaves the starter alone rather than stranding it in the old draft.
     expect(setDraft).not.toHaveBeenCalled()
-    expect(startSession).toHaveBeenCalledWith('finance')
+    expect(startSession).toHaveBeenCalledWith('market')
   })
 
   it('steps the sub-scenario strip in both directions', () => {

@@ -20,8 +20,8 @@ export const zh = {
 
   'office.documents': '文档处理',
   'office.documents.template': '帮我处理这份文档：',
-  'office.finance': '金融服务',
-  'office.finance.template': '帮我分析一下沪深300的盘面：当前评分、所处位置和买卖时机。',
+  'office.market': '大盘解读',
+  'office.market.template': '帮我解读今天的大盘：指数结构、均线位置、量能和涨跌概览。',
   'office.analytics': '数据分析及可视化',
   'office.analytics.template': '帮我分析这组数据并给出可视化建议：',
   'office.workbench': '个人工作台',
@@ -76,8 +76,8 @@ export const en = {
 
   'office.documents': 'Documents',
   'office.documents.template': 'Help me work on this document: ',
-  'office.finance': 'Finance',
-  'office.finance.template': 'Help me read the CSI 300: its current score, where it stands, and the buy or sell timing.',
+  'office.market': 'Market overview',
+  'office.market.template': 'Read today\'s A-share market: index structure, moving averages, volume, and breadth.',
   'office.analytics': 'Data analysis & visualisation',
   'office.analytics.template': 'Help me analyse this dataset and suggest visualisations: ',
   'office.workbench': 'Personal workbench',

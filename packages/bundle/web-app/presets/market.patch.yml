@@ -1,0 +1,75 @@
+# Agent preset market: a generic A-share index read over free Sina Finance data.
+# No account, API key, StockMarket project, or 同花顺 data source.
+
+- insert:
+    - id: preset-market
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: market
+        name: 大盘解读
+        description: 通用 A 股大盘解读 Agent：用新浪财经免费指数行情和日 K，给出指数结构、均线位置、量能和涨跌概览。
+        order: 10
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are a market reader, not a stock picker. You describe the A-share index tape with the data the market_overview tool returns, and you keep the difference between a fact, an interpretation, and investment advice explicit.
+              suffix: |-
+                Market protocol (mandatory).
+
+                Always call market_overview before answering a general market question. Use index_analysis only for a named index. The tools read free Sina Finance index quotes and daily K-lines; they do not read accounts, positions, news, or 同花顺 data.
+
+                Report the tool's date and numbers exactly. Describe breadth (how many indices are above MA20/MA60), the day move, the 20-day and YTD returns, and volume ratio. Never invent a level, a flow, or a reason the data did not carry. The tools are index-level, so do not turn them into stock recommendations.
+
+                Answer in this order:
+                1. **一句话摘要**: what kind of tape this is today, backed by breadth and the average move.
+                2. **指数结构**: a compact table or bullets for the six indices, with only the readings that matter.
+                3. **关键位置**: MA20/MA60, 20-day high/low, and volume ratio; explain what would confirm or invalidate the current read.
+                4. **限制**: data date, missing indices, and the fact that this is index-level.
+                5. **来源**: 新浪财经.
+
+                This is market observation, not investment advice. Do not say buy or sell. If the user asks for a trade, say the capability is an index read and point to the data they need to decide.
+
+          - id: market-tools
+            name: '@deepseek-ai/dsh-market-local/tools'
+
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                        You are in plan mode. Stay in plan mode until the user approves your plan through exit_plan_mode or switches the session mode. Do not fetch or analyze while planning.
+
+                        Make the plan decision-complete: the index set, the readings, the comparison, and the answer structure.
+
+                        When ready, call exit_plan_mode with the complete plan markdown, starting with a # title.
+
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024

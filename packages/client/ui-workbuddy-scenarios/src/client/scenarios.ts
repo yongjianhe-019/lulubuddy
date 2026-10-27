@@ -46,10 +46,10 @@ export const SCENARIOS: readonly Scenario[] = [
     subs: [
       { id: 'documents', labelKey: 'office.documents', templateKey: 'office.documents.template' },
       {
-        id: 'finance',
-        labelKey: 'office.finance',
-        templateKey: 'office.finance.template',
-        presetId: 'finance',
+        id: 'market',
+        labelKey: 'office.market',
+        templateKey: 'office.market.template',
+        presetId: 'market',
       },
       { id: 'analytics', labelKey: 'office.analytics', templateKey: 'office.analytics.template' },
       { id: 'workbench', labelKey: 'office.workbench', templateKey: 'office.workbench.template' },

@@ -34,8 +34,8 @@ describe('the scenario taxonomy', () => {
   it('names an agent preset only where a capability backs the pick', () => {
     // Finance, slides, video, and Xiaohongshu are the sub-scenarios whose pick
     // reaches an agent instead of only writing a starter; the rest stay as they were.
-    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['finance', 'research', 'slides', 'video', 'xhs'])
-    expect(SUBS.find(sub => sub.id === 'finance')?.presetId).toBe('finance')
+    expect(SUBS.filter(sub => sub.presetId !== undefined).map(sub => sub.id)).toEqual(['market', 'research', 'slides', 'video', 'xhs'])
+    expect(SUBS.find(sub => sub.id === 'market')?.presetId).toBe('market')
     expect(SUBS.find(sub => sub.id === 'video')?.presetId).toBe('video')
     expect(SUBS.find(sub => sub.id === 'xhs')?.presetId).toBe('xiaohongshu')
     expect(SUBS.find(sub => sub.id === 'slides')?.presetId).toBe('ppt')
@@ -67,13 +67,10 @@ describe('the scenario taxonomy', () => {
     expect(Object.keys(en).sort()).toEqual(Object.keys(zh).sort())
   })
 
-  it('states the finance starter as a question rather than as a protocol', () => {
-    // The preset owns the routing rules and the tool list, so the starter must
-    // not restate them or name a tool the agent does not have.
+  it('states the market starter as a question rather than as a protocol', () => {
     for (const side of [zh, en]) {
-      const starter = side['office.finance.template']
-      expect(starter).not.toContain('sector_theme_query')
-      expect(starter).not.toContain('opportunity_radar')
+      const starter = side['office.market.template']
+      expect(starter).not.toContain('market_overview')
       expect(starter.length).toBeLessThan(100)
     }
   })
@@ -119,8 +116,8 @@ describe('ui-workbuddy-scenarios apply', () => {
     // The plugin's own copy reaches the seat through the registration's
     // locale namespace, and the business face forwards to the launcher.
     const face = (entries[0]!.inject as unknown as () => { startSession: (id: string) => void })()
-    face.startSession('finance')
-    expect(starts).toEqual(['finance'])
+    face.startSession('market')
+    expect(starts).toEqual(['market'])
     expect(locale.bind('workbuddy.scenarios')('scenario.office')).toBe(zh['scenario.office'])
   })
 })

@@ -50,13 +50,15 @@
   "exclude": [
     "packages/client/*/tests/**/*.host.spec.ts",
     "packages/client/*/tests/**/*.host.e2e.ts",
-    "packages/client/*/tests/**/*.host.ts"
+    "packages/client/*/tests/**/*.host.ts",
+    "packages/finance/**",
+    "packages/client/ui-finance-view/**"
   ],
   "references": [
     { "path": "./packages/client/ui-workbuddy-mode" },
     { "path": "./packages/client/ui-workbuddy-scenarios" },
     { "path": "./packages/client/ui-workbuddy-shell" },
-    { "path": "./packages/client/ui-finance-view" },
+    { "path": "./packages/client/ui-market-view" },
     { "path": "./packages/client/ui-video-view" },
     { "path": "./packages/client/ui-xhs-view" },
     { "path": "./packages/client/ui-ppt-view" },
