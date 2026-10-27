@@ -28,8 +28,8 @@ export const zh = {
   'office.workbench.template': '帮我整理今天的工作：',
   'office.slides': 'PPT 制作',
   'office.slides.template': '帮我做一份 PPT，主题是：',
-  'office.research': '网页分析',
-  'office.research.template': '给我一个网页 URL，我来读取图文并回答：',
+  'office.research': '文章解读',
+  'office.research.template': '把文章链接或 PDF 发给我，我来解读：',
 
   'code.daily': '日常开发',
   'code.daily.template': '帮我实现这个功能：',
@@ -84,8 +84,8 @@ export const en = {
   'office.workbench.template': "Help me sort out today's work: ",
   'office.slides': 'Slide deck production',
   'office.slides.template': 'Help me build a slide deck about: ',
-  'office.research': 'Web analysis',
-  'office.research.template': 'Give me a URL and I will read the page and answer: ',
+  'office.research': 'Article reading',
+  'office.research.template': 'Send me an article URL or PDF and I will read it: ',
 
   'code.daily': 'Everyday coding',
   'code.daily.template': 'Help me implement this: ',
