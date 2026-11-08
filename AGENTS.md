@@ -2,6 +2,22 @@
 
 DeepSeek Harness is an all-plugin Cordis agent harness. Read [docs/architecture.md](docs/architecture.md) before changing `packages/`; follow [docs/AGENTS.md](docs/AGENTS.md) for documentation.
 
+## This is the WorkBuddy fork
+
+This checkout is a fork of upstream dsh carrying the WorkBuddy product surfaces.
+Read [FORK.md](FORK.md) for what the fork owns and the rules that keep upgrades
+cheap, and [FORK-UPGRADE.md](FORK-UPGRADE.md) for the upgrade runbook.
+
+Two rules override convenience:
+
+- **Add a package, do not edit an upstream one.** Every upstream file the fork
+  edits becomes a merge conflict on the next upgrade.
+- **Fork plugin rows go in `presets/<name>.patch.yml`**, never inline in
+  `cordis.patch.yml`.
+
+`node scripts/fork-upgrade.mjs` reports the gap to upstream, the official
+upgrade guides to read, and the conflict surface with a standing rule per file.
+
 ## Pre-stable APIs and released Session data
 
 Public APIs are pre-stable; update every consumer. Follow [version/status](docs/session-format-status.md) and [type acknowledgements](docs/cookbook/reviewing-persistence-type-changes.md). [Adjacent migration](.agents/notes/implemented/architecture/2026-08-31-released-session-format-migrations.md) may add a version-named successor but never move, overwrite, or delete committed generations; predecessors imply neither fallback nor downgrade support. SQLite uses monotonic `SCHEMA_VERSION`.
