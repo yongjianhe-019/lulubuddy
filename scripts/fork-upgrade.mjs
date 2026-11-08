@@ -3,7 +3,8 @@
  * fork-upgrade — keep the WorkBuddy fork a thin layer on top of upstream dsh.
  *
  * `node scripts/fork-upgrade.mjs`            report only: gap, guides, hotspots
- * `node scripts/fork-upgrade.mjs --start`    cut upgrade/<version> and merge
+ * `node scripts/fork-upgrade.mjs --start`    cut upgrade/<version> and merge main
+ * `node scripts/fork-upgrade.mjs --finish`   fast-forward main, tag, drop the branch
  * `node scripts/fork-upgrade.mjs --to <ref>` compare against another ref
  *
  * The script never resolves conflicts. It tells you exactly which files need a
@@ -74,6 +75,7 @@ const FORK_OWNED = [
 ]
 
 const branch = git(['rev-parse', '--abbrev-ref', 'HEAD'])
+const FORK_BRANCH = value('--branch-base', 'main')
 const target = value('--to', 'origin/master')
 
 console.log(`fork branch : ${branch}`)
@@ -170,6 +172,36 @@ if (deleted.length) {
   console.log('  names a workspace package that no longer exists (pnpm install will fail).')
 }
 
+
+// ── Fast-forward main, tag the release, drop the upgrade branch ─────────────
+if (flag('--finish')) {
+  if (!branch.startsWith('upgrade/')) {
+    console.error(`\n--finish expects an upgrade/<version> branch, found ${branch}.`)
+    process.exit(1)
+  }
+  if (git(['status', '--porcelain'])) {
+    console.error('\nWorking tree is dirty. Commit first.')
+    process.exit(1)
+  }
+  const version = versionOf(target)
+  const tag = `fork/${version}`
+  console.log(`\n── finishing ${branch} ────────────────────────────────────────────`)
+  git(['checkout', FORK_BRANCH])
+  try {
+    git(['merge', '--ff-only', branch])
+  } catch {
+    console.error(`\n${FORK_BRANCH} is not a fast-forward of ${branch}. Merge it by hand.`)
+    process.exit(1)
+  }
+  git(['tag', '-f', tag, 'HEAD'])
+  git(['branch', '-D', branch])
+  console.log(`  ${FORK_BRANCH} -> ${git(['rev-parse', '--short', 'HEAD'])}`)
+  console.log(`  tagged ${tag}`)
+  console.log(`  deleted ${branch}`)
+  console.log(`\nPush when the smoke test is clean:\n  git push lulubuddy ${FORK_BRANCH}`)
+  process.exit(0)
+}
+
 if (!flag('--start')) {
   console.log(`\nReport only. To cut the upgrade branch and merge:\n  node scripts/fork-upgrade.mjs --start`)
   process.exit(0)
@@ -181,10 +213,10 @@ if (git(['status', '--porcelain'])) {
   console.error('\nWorking tree is dirty. Commit or stash first so the merge is reviewable.')
   process.exit(1)
 }
-console.log(`\n── cutting ${next} from ${target} and merging ${branch} ─────────────────`)
+console.log(`\n── cutting ${next} from ${target} and merging ${FORK_BRANCH} ─────────────────`)
 git(['checkout', '-b', next, target])
 try {
-  git(['merge', branch, '--no-commit', '--no-ff'])
+  git(['merge', FORK_BRANCH, '--no-commit', '--no-ff'])
   console.log('\nMerged with no conflicts.')
 } catch {
   const conflicted = git(['diff', '--name-only', '--diff-filter=U']).split('\n').filter(Boolean)
@@ -200,5 +232,5 @@ Next:
   5. pnpm run typecheck
   6. pnpm run build:artifacts
   7. pnpm dsh web --no-open --port 3080   (smoke test the UI)
-  8. git branch -m ${next} workbuddy/${versionOf(target).replace(/-rc\\.\\d+$/, '')}
+  8. node scripts/fork-upgrade.mjs --finish
 `)

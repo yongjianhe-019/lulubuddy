@@ -5,8 +5,8 @@ Everything upstream is kept as-is; the fork adds WorkBuddy's surfaces on top and
 edits as few upstream files as it can get away with. Every upstream file the fork
 touches is a conflict in the next upgrade, so the count is the budget.
 
-- Current branch: `workbuddy/0.2.2`
-- Based on: upstream `0.2.2-rc.1`
+- Branch: `main` (tracks `lulubuddy/main`), one long-lived branch
+- Based on: upstream `0.2.2-rc.1`, tagged `fork/0.2.2-rc.1`
 - Upgrade procedure: [`FORK-UPGRADE.md`](FORK-UPGRADE.md), tool: `scripts/fork-upgrade.mjs`
 
 ## What the fork owns

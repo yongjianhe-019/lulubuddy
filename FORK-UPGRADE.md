@@ -31,8 +31,8 @@ documented and both would have been guessed wrong.
 node scripts/fork-upgrade.mjs --start
 ```
 
-Creates `upgrade/<upstream-version>` from `origin/master` and merges the fork
-branch into it. The fork branch itself is untouched, so a bad merge costs nothing.
+Creates `upgrade/<upstream-version>` from `origin/master` and merges `main` into
+it. `main` is untouched, so a bad merge costs nothing.
 
 Refuses to run on a dirty tree: commit or stash first.
 
@@ -96,24 +96,38 @@ Check, in order:
 4. one tool call actually runs end to end
 5. the brand reads LuluBuddy
 
-## 8. Promote the branch
+## 8. Promote to `main`
 
 ```sh
-git branch -m upgrade/<version> workbuddy/<version>
+node scripts/fork-upgrade.mjs --finish
 ```
 
-Keep the previous `workbuddy/<old-version>` branch. It is the rollback.
+Fast-forwards `main` to the upgrade branch, tags `fork/<upstream-version>`,
+deletes the upgrade branch, and prints the push command.
+
+```sh
+git push lulubuddy main
+```
+
+## Branch model
+
+One long-lived branch: `main`, tracking `lulubuddy/main`. Upgrade work happens
+on a throwaway `upgrade/<version>` branch and lands on `main` by fast-forward.
+
+No backup branches. The previous version is a commit in `main`'s history, so it
+needs no branch to stay reachable. Each release is tagged `fork/<version>`.
 
 ## Rollback
 
 ```sh
-git checkout workbuddy/<previous-version>
+git log --oneline --decorate main        # find the previous fork/<version> tag
+git checkout fork/<previous-version>     # or: git reset --hard <commit>
 pnpm install
 pnpm run build:artifacts
 ```
 
-`backup/pre-<version>-upgrade` holds the exact pre-upgrade state including
-whatever was uncommitted at the time.
+Rebuild after checking out an older commit: `lib/` is generated and is not
+tracked.
 
 ## What "smooth" means here
 
