@@ -98,6 +98,12 @@ export const SCENARIOS: readonly Scenario[] = [
         presetId: 'xiaohongshu',
       },
       {
+        id: 'toutiao',
+        labelKey: 'design.toutiao',
+        templateKey: 'design.toutiao.template',
+        presetId: 'toutiao',
+      },
+      {
         id: 'image',
         labelKey: 'design.image',
         templateKey: 'design.image.template',

@@ -1,7 +1,7 @@
 /**
  * `workbuddy.scenarios` namespace dictionaries.
  *
- * Three scenarios, nineteen sub-scenarios, and one prompt starter each. A
+ * Three scenarios, twenty-one sub-scenarios, and one prompt starter each. A
  * starter is the question a pick puts in front of the user; a sub-scenario that
  * also names an agent preset gets the capability from that preset's own prompt,
  * so its starter must not restate the protocol that prompt already carries.
@@ -54,6 +54,8 @@ export const zh = {
   'design.video.template': '帮我做一条短视频，主题是：',
   'design.xhs': '小红书创作',
   'design.xhs.template': '帮我做一篇小红书帖子，主题是：',
+  'design.toutiao': '头条创作',
+  'design.toutiao.template': '从今天的头条热榜里找一条，写一条微头条并发布。',
   'design.mobile': '移动端 App',
   'design.mobile.template': '帮我设计一个移动端 App 界面，需求是：',
   'design.system': '设计系统',
@@ -112,6 +114,8 @@ export const en = {
   'design.video.template': 'Make a short video about: ',
   'design.xhs': 'Xiaohongshu post',
   'design.xhs.template': 'Make a Xiaohongshu post about: ',
+  'design.toutiao': 'Toutiao post',
+  'design.toutiao.template': 'Find a trending Toutiao story, write a microblog, and publish it.',
   'design.mobile': 'Mobile app',
   'design.mobile.template': 'Help me design a mobile app screen. Requirements: ',
   'design.system': 'Design system',

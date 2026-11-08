@@ -46,7 +46,8 @@
     "presets/ppt.patch.yml",
     "presets/image.patch.yml",
     "presets/market.patch.yml",
-    "presets/research.patch.yml"
+    "presets/research.patch.yml",
+    "presets/toutiao.patch.yml"
   ],
   "license": "MIT",
   "dsh": {
@@ -62,7 +63,8 @@
         "./presets/ppt.patch.yml",
         "./presets/image.patch.yml",
         "./presets/market.patch.yml",
-        "./presets/research.patch.yml"
+        "./presets/research.patch.yml",
+        "./presets/toutiao.patch.yml"
       ]
     }
   },
