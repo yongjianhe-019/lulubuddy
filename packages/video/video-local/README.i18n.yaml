@@ -1,0 +1,121 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/video/video-local/README.md
+/:
+  en: a2754fd85f95422d
+  zh: 0204fa3b0741d3e1
+/deepseek-ai-dsh-video-local:
+  en: 015b5a08bdd5bdb6
+  zh: 2bc088cfa0283f7d
+/deepseek-ai-dsh-video-local/summary:
+  en: fb1ad45ecf53f08d
+  zh: 736c08e457e44906
+/deepseek-ai-dsh-video-local/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: ffab54373e9e61f0
+/deepseek-ai-dsh-video-local/use-this-package:
+  en: e597ad85dff45c4f
+  zh: b411ca6be04012bd
+/deepseek-ai-dsh-video-local/use-this-package/when-to-choose-it:
+  en: fe5b4fc0ebd154f2
+  zh: dd7906840d78d2ce
+/deepseek-ai-dsh-video-local/use-this-package/requirements:
+  en: 1258c54623ff92d9
+  zh: 12430105317914f7
+/deepseek-ai-dsh-video-local/use-this-package/minimal-configuration:
+  en: 7e8f85d2394364cb
+  zh: 0b54240ad6650c1d
+/deepseek-ai-dsh-video-local/use-this-package/the-tools:
+  en: fbce3efdc9be3659
+  zh: 00759c2c5d1f3e8f
+/deepseek-ai-dsh-video-local/use-this-package/what-setup-does:
+  en: 6023c03dd2349c94
+  zh: 3e128142761c78b6
+/deepseek-ai-dsh-video-local/use-this-package/playing-the-result:
+  en: 8d751fd8534d606a
+  zh: e5f48efc98a40edd
+/deepseek-ai-dsh-video-local/use-this-package/failures-and-recovery:
+  en: 84a724935d259690
+  zh: 3ab965f4c407393f
+/deepseek-ai-dsh-video-local/understand-the-implementation:
+  en: 01ce17e355f80f21
+  zh: 680cabce4d8e6878
+/deepseek-ai-dsh-video-local/understand-the-implementation/capability-seam-roles:
+  en: 88751689d89c79d2
+  zh: a05e5287e4cb7fc4
+/deepseek-ai-dsh-video-local/understand-the-implementation/process-model:
+  en: 268a342678d21b58
+  zh: b1db128a80ed8d2b
+/deepseek-ai-dsh-video-local/understand-the-implementation/narration-cache-and-timeline:
+  en: 32fa8aa6fa678bbd
+  zh: 2479dcccf821004f
+/deepseek-ai-dsh-video-local/understand-the-implementation/the-render-project:
+  en: 8a1d56e76e22a1cb
+  zh: b41482c9a7d54db2
+/deepseek-ai-dsh-video-local/understand-the-implementation/source-map:
+  en: ae6044ab3f9364f5
+  zh: eeb37ea003aa9eaa
+/deepseek-ai-dsh-video-local/understand-the-implementation/read-path:
+  en: 31364e1b80b1605d
+  zh: 3152b4c3062ce285
+/deepseek-ai-dsh-video-local/further-exploration:
+  en: b68d1011f76384d9
+  zh: ae6782f426ae36aa
+/deepseek-ai-dsh-video-local/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-video-local/model-experience/model-facing-tools:
+  en: 59bd7715039e05fc
+  zh: 59bd7715039e05fc
+/deepseek-ai-dsh-video-local/model-experience/model-facing-tools/what-the-model-sees:
+  en: b085c833b768e8c9
+  zh: 820441d95326bbb4
+/deepseek-ai-dsh-video-local/model-experience/model-facing-tools/token-effect:
+  en: 450c317eb2f674b9
+  zh: 4743a331ff071891
+/deepseek-ai-dsh-video-local/model-experience/model-facing-tools/kv-cache-effect:
+  en: 85dad882ff9c7ae0
+  zh: 2665a5fac04ac172
+/deepseek-ai-dsh-video-local/model-experience/tool-results:
+  en: beaabb79f229692a
+  zh: beaabb79f229692a
+/deepseek-ai-dsh-video-local/model-experience/tool-results/what-the-model-sees:
+  en: a82b4bc7b8252737
+  zh: 5c63aed0f7cfb5a1
+/deepseek-ai-dsh-video-local/model-experience/tool-results/token-effect:
+  en: df9c04d7442d74ac
+  zh: 1ee43ac6d51a96f8
+/deepseek-ai-dsh-video-local/model-experience/tool-results/kv-cache-effect:
+  en: f5d5f97a153f7c70
+  zh: 29b3ec1c36a1130b
+/deepseek-ai-dsh-video-local/model-experience/tool-failure:
+  en: 2323da669d049568
+  zh: 2323da669d049568
+/deepseek-ai-dsh-video-local/model-experience/tool-failure/what-the-model-sees:
+  en: 8844fc4a42a6c3cc
+  zh: 9ad9b967b24764db
+/deepseek-ai-dsh-video-local/model-experience/tool-failure/token-effect:
+  en: ce3c3cae4be4cdd8
+  zh: ffcf6f01b5523655
+/deepseek-ai-dsh-video-local/model-experience/tool-failure/kv-cache-effect:
+  en: 4c29fa07e83d79f5
+  zh: 0bec10ad431b97f3
+/deepseek-ai-dsh-video-local/model-experience/render-payload:
+  en: 7e375db28edf2a2d
+  zh: 7e375db28edf2a2d
+/deepseek-ai-dsh-video-local/model-experience/render-payload/what-the-model-sees:
+  en: d263adba8aa6006f
+  zh: d3de3746fc452cd1
+/deepseek-ai-dsh-video-local/model-experience/render-payload/token-effect:
+  en: 592b655eae48ada5
+  zh: 4496a3f88dbe420c
+/deepseek-ai-dsh-video-local/model-experience/render-payload/kv-cache-effect:
+  en: 82b7ac1bab8af2dc
+  zh: f5633e5f585d230b
+/deepseek-ai-dsh-video-local/known-limitations-and-deferred-work:
+  en: f78f67ecb99b7b8a
+  zh: bed5e62cd5328a83
+/deepseek-ai-dsh-video-local/known-limitations-and-deferred-work/dev-note:
+  en: b3fbac8d4a2bfe25
+  zh: 432a08c63fd995e4

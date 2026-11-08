@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-workbuddy-scenarios/README.md
+/:
+  en: 2c6691255e28c93c
+  zh: 9a11ee2cb83d215a
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios:
+  en: 5d78dde1bf521355
+  zh: e5daf90698f4e20f
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/summary:
+  en: d9fe7dd966f45272
+  zh: 63842aca9357c33f
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/use-this-package:
+  en: 4923bb6829800825
+  zh: 278914fc7da39e6a
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/use-this-package/what-a-pick-does:
+  en: addee4eed23f9dc7
+  zh: 771db088ce3b537d
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/use-this-package/the-taxonomy:
+  en: 91c879dda79006f8
+  zh: 6d24f2892f6178ec
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/understand-the-implementation:
+  en: 27f217e23f6ced81
+  zh: a7a3dae895036d0e
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/understand-the-implementation/the-mark-is-local-the-draft-is-not:
+  en: b8109b520bf1720f
+  zh: f073384099ee2111
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/further-exploration:
+  en: e4d1e884d3e9a603
+  zh: ba14678d30180e4a
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/model-experience:
+  en: 6199bec2530aef26
+  zh: 8a874eb91e4e1e10
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/model-experience/kv-cache-effect:
+  en: 7eb86b7e4df2fdd7
+  zh: 08ed0d7f94a92191
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/known-limitations-and-deferred-work:
+  en: 87f6eeccecb703ee
+  zh: b77e73cd75f71c05
+/deepseek-ai-dsh-client-ui-workbuddy-scenarios/known-limitations-and-deferred-work/dev-note:
+  en: c4fd29cc2222ac1b
+  zh: c90157aef15334b7

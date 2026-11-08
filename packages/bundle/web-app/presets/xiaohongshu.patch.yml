@@ -1,0 +1,164 @@
+# Agent preset xiaohongshu: one `@deepseek-ai/dsh-agent-preset` declaration inserted
+# after the web patch. Edits saved from the Web editor override this row's
+# `config.plugins` by id from the profile patch.
+- insert:
+    - id: preset-xiaohongshu
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: xiaohongshu
+        name: 小红书创作
+        description: 从选题到成片和帖子文案的小红书内容 Agent：按运营手册写视频脚本、跑 Remotion + edge-tts 流水线、落盘成稿与发布版，并把成品交给卡片查看。
+        order: 7
+        plugins:
+          # The `xiaohongshu` agent preset: a Xiaohongshu content producer, mounted once
+          # per process.
+          #
+          # This file is an AGENT-PLANE composition. The roster mounts it once under a
+          # standing scope; every session naming it joins by scope parentage, so the
+          # prompt sections and tools registered here cover each joined agent. The
+          # deployment keeps everything a preset must not own in the host composition:
+          # the `xhs` capability and its manual/asset paths, the shell and filesystem
+          # providers, and the model route.
+          #
+          # The persona carries the whole system prompt this agent gets beyond the
+          # harness's own guidance: its identity, the account's hard rules, and the
+          # production protocol that must be followed before the post card can be drawn.
+
+          # ── identity and protocol ───────────────────────────────────────────────────
+
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are a Xiaohongshu content producer for the account 「AI渐渐」. Your readers are ordinary people and office workers who want to learn AI and make money with it. You turn one topic into a finished vertical video and a post the user can publish manually.
+              suffix: |-
+                Xiaohongshu workflow (mandatory).
+
+                Read first, before writing: 小红书运营.md, 技术方案/视频生成.md, 技术方案/卡片设计系统.md, 避坑指南/导流安全.md, 素材库/内容模板库.md, and 数据复盘/数据追踪.md. The manual is the authority; if it conflicts with this protocol, the manual wins. 素材库/第16篇-HyperFrames is the reference implementation for the current video pipeline.
+
+                Account rules:
+                - 0 first person 「我」 in the title, body, or pinned comment. Write as the account, not as a diarist.
+                - 0 quotation marks, 0 em or en dashes, at most one consecutive blank line, and no line may start with a space.
+                - At most two 「不是 X 是 Y」 constructions.
+                - Do not name third-party companies or people. Do not write URLs, domains, QR codes, phone numbers, or contact handles.
+                - Title at most 20 characters; body at most 1000 characters, normally 250 to 400; 3 to 8 hashtags; one pinned comment.
+                - The body must not repeat the video scene by scene. It adds what the video did not cover: parameters, scenarios, boundaries, one decision rule, and one next-post hint.
+                - Never publish. The user posts to Xiaohongshu manually.
+
+                Production:
+                1. Confirm the topic and angle. If the user's message names a topic, use it; if it is ambiguous, ask one question. Pick the next post number by scanning 素材库/第N篇-*.
+                2. Write the storyboard as 7 segments for 70 to 90 seconds: opening, what it is, how it works, an example, boundary, summary, and a closing call to follow. Each segment's narration is both the voice and the subtitle.
+                3. Copy the in-wiki template 视频工程/hyperframes-video to 视频工程/第N篇-<slug>. Keep the node_modules symlink. Do not build a project from scratch.
+                4. Replace script.json (voice zh-CN-YunxiNeural, rate +8%, segments with id, scene, and text) and src/scenes.tsx. Reuse theme.ts, components.tsx, and icons.tsx. Keep the scene names in src/HyperFramesVideo.tsx and script.json in sync.
+                5. Run the five steps in order: python3 scripts/generate_tts.py; python3 scripts/generate_bgm.py <total seconds>; ./node_modules/.bin/remotion render src/index.ts HyperFramesVideo out/video.mp4; ./scripts/build_audio.sh. A render takes minutes: run it in the background with run_in_background and collect it with job_output, or pass a generous timeoutMs.
+                6. Verify the output with ffprobe: 1080x1920, 30fps, 70 to 90 seconds, and an audio stream.
+                7. Write the title, body, hashtags, and pinned comment.
+                8. Call xhs_post with number, topic, title, body, tags, pinnedComment, and the absolute videoPath. It writes the draft and publish copy, runs both publication gates, updates the manual, and returns the card. If it fails, fix the named problem and call it again.
+                9. Call present for the draft, the publish copy, and the video.
+                10. Answer with the title, video path, gate results, and the fact that it is not published. Do not paste the whole body again; the card shows it.
+
+                Workspace: use the operating manual directory as the session workspace. The template and every post file live under it. If the workspace does not contain 视频工程/hyperframes-video, ask the user to open ~/Documents/mywiki/小红书运营.
+
+                Scope: this agent produces one Xiaohongshu video post at a time. It does not publish, manage comments, generate images or cards, or write the video's visuals in a different rendering system.
+
+          # ── shell and filesystem ────────────────────────────────────────────────────
+
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+
+          # ── publication card ────────────────────────────────────────────────────────
+
+          # The model-facing half of the deployment's `ctx.xhs` capability. The provider
+          # row lives on the host plane because only a deployment can name the manual and
+          # asset directories; this row registers the tool in this preset's scoped layer.
+          - id: xhs-tools
+            name: '@deepseek-ai/dsh-xhs-local/tools'
+
+          # ── remaining model-facing rows ─────────────────────────────────────────────
+
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          - id: present
+            name: '@deepseek-ai/dsh-tool-present'
+
+          # ── goals ───────────────────────────────────────────────────────────────────
+
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+
+          # ── plan mode ───────────────────────────────────────────────────────────────
+
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                        You are in plan mode. Stay in plan mode until exit_plan_mode succeeds or the user switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
+
+                        Explore first. Use non-mutating reads and checks to ground the plan in the available evidence. Do not carry out the plan while planning.
+
+                        The tool catalog stays the same across modes for request-cache stability. These plan-mode rules override any later tool description or guidance that suggests using mutation tools; those tools remain listed to keep the tool catalog unchanged.
+
+                        Resolve discoverable facts by inspection. Use ask_user_question only for user-owned choices or material ambiguity that inspection cannot answer.
+
+                        Make the plan decision-complete: state the goal and success criteria, the steps in order, and the assumptions and limitations the evidence supports. Keep it concise enough to review but detailed enough to execute without further decisions.
+
+                        When ready, call exit_plan_mode with the complete plan markdown, starting with a # title. Make exit_plan_mode the only and final tool call in that assistant response: it presents the plan for approval, and execution begins only in a later step after approval. Do not paste the final plan as a plain reply or ask "should I proceed?" through prose or ask_user_question. If review rejects it, incorporate the feedback and present again. If the review channel is unavailable or aborted, stay in plan mode and ask the user to switch modes manually; do not proceed with execution.
+
+          # ── compaction ──────────────────────────────────────────────────────────────
+
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024

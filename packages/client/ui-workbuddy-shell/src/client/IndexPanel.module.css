@@ -1,0 +1,96 @@
+/* Read-only index panel: a heading block over one informational row per
+ * WorkBuddy surface. Colors ride semantic aliases only, so the panel is legible
+ * under the shipped theme and picks up the WorkBuddy skin when that skin is
+ * active. */
+
+.panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.header {
+  flex: 0 0 auto;
+  padding: 20px 24px 12px;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l3);
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.lead {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.rows {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  min-height: 0;
+  padding: 12px 16px 20px;
+  overflow: auto;
+  list-style: none;
+}
+
+/* The panel sits on the frame's base surface, and `.rows` scrolls, so nothing
+ * in this sheet may use an elevated surface token: the scrollbar rebinding
+ * contract in ui-theme styles/scrollbar.css reads a scroll container plus a
+ * `--dsw-alias-bg-*`/`--dsw-specific-*` fill as an elevated surface and would
+ * demand an l2 thumb this panel has no elevation to match. The row keeps a
+ * non-elevated surface token; the tag is a control, so it takes an
+ * `interactive-*` fill rather than a surface one. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.absent {
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.name {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.backing {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.absent .backing {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+/* The absence tag rides the same row, after the backing line, at label size. */
+.tag {
+  justify-self: start;
+  margin-top: 2px;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  corner-shape: round;
+  background: var(--dsw-alias-interactive-bg-hover-solid);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}

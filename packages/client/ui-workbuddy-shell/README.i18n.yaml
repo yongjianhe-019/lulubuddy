@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-workbuddy-shell/README.md
+/:
+  en: 6425fb13b9fce082
+  zh: 7be776ac8bc26180
+/deepseek-ai-dsh-client-ui-workbuddy-shell:
+  en: 82e4b5f2c08786ae
+  zh: c31027db28b77fcb
+/deepseek-ai-dsh-client-ui-workbuddy-shell/summary:
+  en: 7f0420b22dbb5400
+  zh: 29c3b5c604b47497
+/deepseek-ai-dsh-client-ui-workbuddy-shell/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-workbuddy-shell/use-this-package:
+  en: 111cd5600f8c636d
+  zh: a1164731a0d4e1d7
+/deepseek-ai-dsh-client-ui-workbuddy-shell/use-this-package/the-capability-index:
+  en: 8ee87ded895fda73
+  zh: 329d81e3eeeac0ec
+/deepseek-ai-dsh-client-ui-workbuddy-shell/use-this-package/the-results-index:
+  en: 744f18d564361752
+  zh: 590988444af4551e
+/deepseek-ai-dsh-client-ui-workbuddy-shell/use-this-package/nothing-here-is-a-control:
+  en: 1bc35f21a9ea4972
+  zh: c159fcd25901a39a
+/deepseek-ai-dsh-client-ui-workbuddy-shell/understand-the-implementation:
+  en: 32209c17ca2c90b7
+  zh: d36d486645467488
+/deepseek-ai-dsh-client-ui-workbuddy-shell/further-exploration:
+  en: 99275787e2340b1b
+  zh: fed97866156a3c88
+/deepseek-ai-dsh-client-ui-workbuddy-shell/model-experience:
+  en: 0642a93d7f542399
+  zh: 108f3115e75c9bc3
+/deepseek-ai-dsh-client-ui-workbuddy-shell/model-experience/kv-cache-effect:
+  en: ca75c51c89c2c9b0
+  zh: de54f3467ef3b9be
+/deepseek-ai-dsh-client-ui-workbuddy-shell/known-limitations-and-deferred-work:
+  en: 3eaca85392542f1e
+  zh: 0db7e59087b6d6e6
+/deepseek-ai-dsh-client-ui-workbuddy-shell/known-limitations-and-deferred-work/dev-note:
+  en: 08da49f2a425b5a9
+  zh: d82aeb4d15539016

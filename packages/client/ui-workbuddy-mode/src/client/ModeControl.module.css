@@ -1,0 +1,63 @@
+/* Ask / Plan / Craft segmented control for the composer's left input strip.
+ * Colors ride semantic aliases only, so the control is legible under the
+ * shipped theme and picks up the WorkBuddy skin when that skin is active. */
+
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9999px;
+  corner-shape: round;
+  background: var(--dsw-alias-bg-module-platform);
+}
+
+.option {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 9999px;
+  corner-shape: round;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+.option:hover:not(.selected) {
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.selected {
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
+}
+
+.selected:hover {
+  background: var(--dsw-alias-button-primary-hover);
+}
+
+.option:disabled {
+  cursor: default;
+  color: var(--dsw-alias-label-dimmed);
+}
+
+.option:disabled.selected {
+  color: var(--dsw-alias-label-primary-foreground);
+}
+
+.error {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-state-error-primary);
+}

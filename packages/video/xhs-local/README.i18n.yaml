@@ -1,0 +1,70 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/video/xhs-local/README.md
+/:
+  en: 00e2560e76afac2f
+  zh: eda1d4de8a24908d
+/deepseek-ai-dsh-xhs-local:
+  en: ea8f270be846003c
+  zh: 01bfb404087a8f2d
+/deepseek-ai-dsh-xhs-local/summary:
+  en: a64c100cb9d8c996
+  zh: 6356acd6ca9a0aa5
+/deepseek-ai-dsh-xhs-local/use-this-package:
+  en: 529a86eb9adc1055
+  zh: c46284da5011bd8a
+/deepseek-ai-dsh-xhs-local/use-this-package/tools:
+  en: 8bbbc447cf6293ad
+  zh: 179ebf1769b61bb2
+/deepseek-ai-dsh-xhs-local/use-this-package/files-and-manual-update:
+  en: a59b33dc981370f4
+  zh: fc6636e44720fad0
+/deepseek-ai-dsh-xhs-local/understand-the-implementation:
+  en: 13c967ebe250cf61
+  zh: 65c55d5dd27cb87b
+/deepseek-ai-dsh-xhs-local/model-experience:
+  en: 215e7ba838619b7b
+  zh: 215e7ba838619b7b
+/deepseek-ai-dsh-xhs-local/model-experience/model-facing-tools:
+  en: 59bd7715039e05fc
+  zh: 59bd7715039e05fc
+/deepseek-ai-dsh-xhs-local/model-experience/model-facing-tools/what-the-model-sees:
+  en: 0eedaf56ce76727d
+  zh: 077bc26eaa8a900d
+/deepseek-ai-dsh-xhs-local/model-experience/model-facing-tools/token-effect:
+  en: 4c2b43cabd00b112
+  zh: 843848526378f1c6
+/deepseek-ai-dsh-xhs-local/model-experience/model-facing-tools/kv-cache-effect:
+  en: 31d70d74b31797a5
+  zh: d4808451d04487c4
+/deepseek-ai-dsh-xhs-local/model-experience/tool-results:
+  en: beaabb79f229692a
+  zh: beaabb79f229692a
+/deepseek-ai-dsh-xhs-local/model-experience/tool-results/what-the-model-sees:
+  en: afeff80a2c03b220
+  zh: 927c03b4c475f630
+/deepseek-ai-dsh-xhs-local/model-experience/tool-results/token-effect:
+  en: dbd4c5febf639404
+  zh: 53a3f1fb601e86c3
+/deepseek-ai-dsh-xhs-local/model-experience/tool-results/kv-cache-effect:
+  en: aa45b7852b29f612
+  zh: 3bfce4ba9a88e8f3
+/deepseek-ai-dsh-xhs-local/model-experience/card-payload:
+  en: 2aefc4a9169dd4b4
+  zh: 2aefc4a9169dd4b4
+/deepseek-ai-dsh-xhs-local/model-experience/card-payload/what-the-model-sees:
+  en: 5bf497a8bdae0442
+  zh: f91a93bfea89b92c
+/deepseek-ai-dsh-xhs-local/model-experience/card-payload/token-effect:
+  en: 592b655eae48ada5
+  zh: 72483379fd30d1d3
+/deepseek-ai-dsh-xhs-local/model-experience/card-payload/kv-cache-effect:
+  en: 8ea9a3236d538bc1
+  zh: 1ac04422866f9626
+/deepseek-ai-dsh-xhs-local/known-limitations-and-deferred-work:
+  en: 22e9508a122fe434
+  zh: e418e35ad072b99f
+/deepseek-ai-dsh-xhs-local/known-limitations-and-deferred-work/dev-note:
+  en: 0de55534a062c2fe
+  zh: 623b66adfac72982

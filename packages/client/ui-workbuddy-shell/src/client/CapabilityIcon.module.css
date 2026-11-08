@@ -1,0 +1,10 @@
+/* Glyph of the left navigation's capability row, matching the sidebar's other
+ * panel icons: currentColor ink, dimmed until the panel is selected. */
+
+.glyph {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.active {
+  color: var(--dsw-alias-label-primary);
+}

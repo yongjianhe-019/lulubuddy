@@ -58,6 +58,23 @@
     - id: subagent-model-selection-settings
       name: '@deepseek-ai/dsh-tool-subagent/model-selection-settings'
 
+    # Short-video production behind the 短视频 agent preset. The render project
+    # is materialized under the harness home the first time a session calls
+    # setup, and nothing is downloaded at load, so this row needs no deployment
+    # input; a deployment that keeps its project elsewhere overrides
+    # `projectRoot` here or in a profile patch.
+    - id: video-local
+      name: '@deepseek-ai/dsh-video-local'
+    - id: motion-local
+      name: '@deepseek-ai/dsh-motion-local'
+      disabled: true
+
+    # Xiaohongshu post packaging behind the 小红书创作 agent preset. The manual
+    # and asset directories have personal defaults; this row serves the finished
+    # video under /xhs-assets and registers no tool of its own.
+    - id: xhs-local
+      name: '@deepseek-ai/dsh-xhs-local'
+
     - id: message-feedback
       name: '@deepseek-ai/dsh-message-feedback'
       config:
@@ -440,6 +457,33 @@
     # plugin draft.
     - id: entry-customization
       name: '@deepseek-ai/dsh-client-ui-entry-customization'
+    # WorkBuddy's capability navigation, scenario tabs, and Ask/Plan/Craft
+    # posture control. These are the custom surfaces this fork keeps on top of
+    # the upstream agent-preset registry.
+    - id: ui-workbuddy-mode
+      name: '@deepseek-ai/dsh-client-ui-workbuddy-mode'
+
+    - id: ui-workbuddy-scenarios
+      name: '@deepseek-ai/dsh-client-ui-workbuddy-scenarios'
+
+    - id: ui-workbuddy-shell
+      name: '@deepseek-ai/dsh-client-ui-workbuddy-shell'
+
+    # Dedicated cards for the market, short-video, and Xiaohongshu tools.
+    - id: ui-market-view
+      name: '@deepseek-ai/dsh-client-ui-market-view'
+    - id: ui-image-view
+      name: '@deepseek-ai/dsh-client-ui-image-view'
+
+    - id: ui-video-view
+      name: '@deepseek-ai/dsh-client-ui-video-view'
+
+    - id: ui-xhs-view
+      name: '@deepseek-ai/dsh-client-ui-xhs-view'
+    - id: ui-ppt-view
+      name: '@deepseek-ai/dsh-client-ui-ppt-view'
+    - id: ui-motion-view
+      name: '@deepseek-ai/dsh-client-ui-motion-view'
 
     - id: ui-settings-session-log
       name: '@deepseek-ai/dsh-client-ui-settings-session-log'

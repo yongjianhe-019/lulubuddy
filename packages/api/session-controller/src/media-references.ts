@@ -7,7 +7,7 @@
  * @module @deepseek-ai/dsh-api-session-controller/media-references
  */
 
-import { isAbsolute } from 'node:path'
+import { basename, isAbsolute } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-connection'
 import type {} from '@deepseek-ai/dsh-attachment'
@@ -28,6 +28,7 @@ async function serveFile(request: Request, fs: FileSystem, maxBytes: number): Pr
     new Response(request.method === 'HEAD' ? null : text, { status, headers: NO_STORE })
   const params = new URL(request.url).searchParams
   const path = params.get('path')
+  const download = params.has('download')
   if (path === null || path.length === 0) return fail(400, 'missing path')
   if (path.includes('\0') || !isAbsolute(path)) return fail(400, 'absolute path required')
   try {
@@ -45,6 +46,7 @@ async function serveFile(request: Request, fs: FileSystem, maxBytes: number): Pr
       ...VERSIONED,
       'Content-Type': mime.lookup(target.displayPath) || 'application/octet-stream',
     }
+    if (download) headers['Content-Disposition'] = `attachment; filename*=UTF-8''${encodeURIComponent(basename(target.displayPath))}`
     if (request.method === 'HEAD') {
       if (info.size !== undefined) headers['Content-Length'] = String(info.size)
       return new Response(null, { headers })

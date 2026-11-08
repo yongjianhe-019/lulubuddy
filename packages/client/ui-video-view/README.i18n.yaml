@@ -1,0 +1,49 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-video-view/README.md
+/:
+  en: f205d1ace9ba7a8b
+  zh: fd1f5beeaceb93e1
+/deepseek-ai-dsh-client-ui-video-view:
+  en: af0e0557f0ea95ee
+  zh: bb0df35644b1964b
+/deepseek-ai-dsh-client-ui-video-view/summary:
+  en: 5110ec85b29e214a
+  zh: e4e52271b935807c
+/deepseek-ai-dsh-client-ui-video-view/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: ffab54373e9e61f0
+/deepseek-ai-dsh-client-ui-video-view/use-this-package:
+  en: b6a6b6f594168f3d
+  zh: 81bdf2bb8eaa4346
+/deepseek-ai-dsh-client-ui-video-view/use-this-package/what-a-card-does-with-a-result:
+  en: 7dcc3be086ad2dcf
+  zh: c443676bf46fd4fe
+/deepseek-ai-dsh-client-ui-video-view/use-this-package/the-player:
+  en: 9e6b9c8e1c1a6afe
+  zh: 22e65f073c8e017a
+/deepseek-ai-dsh-client-ui-video-view/understand-the-implementation:
+  en: 31406a1d14a24efd
+  zh: 5b0c6f906ef9b337
+/deepseek-ai-dsh-client-ui-video-view/understand-the-implementation/the-registration:
+  en: 3f4bbd59571c038c
+  zh: c976a1ed64e8e2ee
+/deepseek-ai-dsh-client-ui-video-view/understand-the-implementation/where-the-timeline-comes-from:
+  en: f0a1ee783b271f8d
+  zh: 63002d3c3831ff2f
+/deepseek-ai-dsh-client-ui-video-view/further-exploration:
+  en: 6d2569e638b7ecc1
+  zh: 246a802d889f063d
+/deepseek-ai-dsh-client-ui-video-view/model-experience:
+  en: 22ba63f18264c091
+  zh: 5dfadc40c0f8d636
+/deepseek-ai-dsh-client-ui-video-view/model-experience/kv-cache-effect:
+  en: 1e57d412e9ed3380
+  zh: 1e57d412e9ed3380
+/deepseek-ai-dsh-client-ui-video-view/known-limitations-and-deferred-work:
+  en: 8ab40015d8b66294
+  zh: fb0575460baae82f
+/deepseek-ai-dsh-client-ui-video-view/known-limitations-and-deferred-work/dev-note:
+  en: b0f305390b04a8e3
+  zh: c6e314677c83b7fa

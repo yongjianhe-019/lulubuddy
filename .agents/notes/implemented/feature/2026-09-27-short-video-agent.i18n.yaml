@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for 2026-09-27-short-video-agent.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-27-short-video-agent.md
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset:
+  en: a1aae24d95870ef9
+  zh: e440d9365aa82c39
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/problem:
+  en: 49c2dbf1814d5875
+  zh: dae4108f6274b1dd
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision:
+  en: 1b016b0d6dd1f778
+  zh: 56b0a894b57747c9
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision/one-host-package-holds-the-operation-the-process-and-the-route:
+  en: eb99db5fa8b5abe6
+  zh: e68a5d5a978e6a5e
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision/one-render-project-per-deployment:
+  en: 85b80f759d320d58
+  zh: 992e5d802dc8e2dc
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision/setup-reconciles-by-dependency-digest-not-by-presence:
+  en: f6f7fc156c79508e
+  zh: 76caedf13619d819
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision/the-model-writes-the-storyboard-not-the-data:
+  en: 0e19b5e1a96e818e
+  zh: 68eb0de876cc40ce
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision/the-playback-url-stays-out-of-the-model-s-context:
+  en: 66de2fd3d95e70d9
+  zh: 038890f905ab9443
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision/the-cards-are-a-separate-client-package:
+  en: 571bb175940025f3
+  zh: cb5aa3b881e13036
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision/the-remotion-licence-is-a-deployment-constraint:
+  en: 1051de3891297ac8
+  zh: 1f3ad527aa24a955
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/decision/the-scenario-pick-opens-the-preset:
+  en: 5acf17ce72f63c46
+  zh: 5ade4db7b416b177
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/alternatives-considered:
+  en: 6ca6541e28a6cec1
+  zh: c1223b131743826d
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/consequences:
+  en: f3c0047ea8b83015
+  zh: c5b5eb102c2bf50c
+/agent-note-short-video-production-is-one-host-capability-one-card-package-and-one-preset/deferred:
+  en: bd1b042419585012
+  zh: a0adf032c3d997f4

@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-09-15-workbuddy-mode-control.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-15-workbuddy-mode-control.md
+/agent-note-workbuddy-collaboration-mode-control:
+  en: 1123f87824ed142a
+  zh: 36e4119d454a65d7
+/agent-note-workbuddy-collaboration-mode-control/problem:
+  en: d8bef9f4a2f2c10b
+  zh: d3d12c799f7e724a
+/agent-note-workbuddy-collaboration-mode-control/decision:
+  en: 28f854a5cd438404
+  zh: 40c03b9f06f71586
+/agent-note-workbuddy-collaboration-mode-control/alternatives-considered:
+  en: 96e87c42c5ce0f46
+  zh: b447011bb91c53b3
+/agent-note-workbuddy-collaboration-mode-control/consequences:
+  en: 670a923acecbbc86
+  zh: 693e06b83063cd58

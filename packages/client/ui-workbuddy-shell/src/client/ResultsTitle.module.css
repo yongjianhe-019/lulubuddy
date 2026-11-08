@@ -1,0 +1,6 @@
+/* The index glyph before the chip's text; the chip's title row centres it on
+ * the text's line and spaces it. */
+
+.titleIcon {
+  flex: none;
+}

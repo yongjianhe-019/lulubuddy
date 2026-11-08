@@ -1,0 +1,49 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-workbuddy-mode/README.md
+/:
+  en: 779aaf29b3a2688b
+  zh: d524c21c9d9ccd03
+/deepseek-ai-dsh-client-ui-workbuddy-mode:
+  en: 58dcce22b6d70574
+  zh: 7d270a08637e1edd
+/deepseek-ai-dsh-client-ui-workbuddy-mode/summary:
+  en: b21bcfa9c7649595
+  zh: 4eb86171807a07d0
+/deepseek-ai-dsh-client-ui-workbuddy-mode/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-workbuddy-mode/use-this-package:
+  en: 29aea358eeefb9ec
+  zh: 1a55549abd5b44b1
+/deepseek-ai-dsh-client-ui-workbuddy-mode/use-this-package/what-the-three-modes-mean:
+  en: d7c00b90042923ba
+  zh: b03cc0a0daf6c234
+/deepseek-ai-dsh-client-ui-workbuddy-mode/use-this-package/craft-lifts-a-restriction-instead-of-forcing-a-preset:
+  en: c8bf60cd5643d0a1
+  zh: 9b0be008a3a5aabf
+/deepseek-ai-dsh-client-ui-workbuddy-mode/use-this-package/what-appears-when-a-capability-is-absent:
+  en: 95a32b6ac26398ad
+  zh: b9b205d68ae06ce4
+/deepseek-ai-dsh-client-ui-workbuddy-mode/understand-the-implementation:
+  en: 4c33aebc4be5936f
+  zh: ecab6d7ff1cc9c83
+/deepseek-ai-dsh-client-ui-workbuddy-mode/understand-the-implementation/no-client-optimism:
+  en: c7ffdf5d667c7a82
+  zh: a6d1e9a77378f8d3
+/deepseek-ai-dsh-client-ui-workbuddy-mode/further-exploration:
+  en: 62cafdfd6810024d
+  zh: 2b858cf9270f0500
+/deepseek-ai-dsh-client-ui-workbuddy-mode/model-experience:
+  en: 457caac41782772f
+  zh: faa366b57ae596c2
+/deepseek-ai-dsh-client-ui-workbuddy-mode/model-experience/kv-cache-effect:
+  en: 4f317afa0f372e18
+  zh: 8a644a64fc3c7169
+/deepseek-ai-dsh-client-ui-workbuddy-mode/known-limitations-and-deferred-work:
+  en: 903e1aa18a0e6285
+  zh: 6289eb12bfa1257e
+/deepseek-ai-dsh-client-ui-workbuddy-mode/known-limitations-and-deferred-work/dev-note:
+  en: 3663615e09053b00
+  zh: a30e9ef83f9b74f1

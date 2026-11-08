@@ -273,7 +273,9 @@
     "scripts/*.client.spec.ts",
     "scripts/client-bundle-css.spec.ts",
     "packages/typert/generator/tests/fixtures/**",
-    "scripts/client-bundle-purity.spec.ts"
+    "scripts/client-bundle-purity.spec.ts",
+    "packages/finance/**",
+    "packages/client/ui-finance-view/**"
   ],
   "references": [
     { "path": "./packages/experimental/action-cards" },
@@ -281,6 +283,12 @@
     { "path": "./packages/experimental/plugin-recommendations" },
     { "path": "./packages/experimental/personalized-recommendations" },
 
+    { "path": "./packages/market/market-local" },
+    { "path": "./packages/design/ppt-local" },
+    { "path": "./packages/design/motion-local" },
+    { "path": "./packages/design/image-local" },
+    { "path": "./packages/video/video-local" },
+    { "path": "./packages/video/xhs-local" },
     { "path": "./packages/experimental/client-ui-cot-translation/tsconfig.host.json" },
     { "path": "./packages/experimental/cot-translation-bundle" },
     { "path": "./packages/experimental/session-search" },
