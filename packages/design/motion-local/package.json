@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-motion-local",
   "description": "Motion-graphics video capability: scaffold a frame-pure HTML composition, render it with Playwright and ffmpeg, synthesize beat-synced sound, and deliver a QC'd MP4",
-  "version": "0.2.1-rc.2",
+  "version": "0.2.2-rc.1",
   "publishConfig": {
     "access": "public"
   },
@@ -33,8 +33,8 @@
   "license": "MIT",
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-tools": "workspace:^",
-    "@deepseek-ai/dsh-util-values": "workspace:^"
+    "@deepseek-ai/dsh-tools": "workspace:*",
+    "@deepseek-ai/dsh-util-values": "workspace:*"
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "workspace:^",
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-tools": "workspace:^",
-    "@deepseek-ai/dsh-util-values": "workspace:^"
+    "@deepseek-ai/dsh-tools": "workspace:*",
+    "@deepseek-ai/dsh-util-values": "workspace:*"
   }
 }

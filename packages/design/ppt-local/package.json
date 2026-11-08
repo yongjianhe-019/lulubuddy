@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-ppt-local",
   "description": "Presentation production capability: scaffold a styled HTML deck, preview it in the document iframe, and export a high-fidelity image-based PPTX",
-  "version": "0.2.1-rc.2",
+  "version": "0.2.2-rc.1",
   "publishConfig": {
     "access": "public"
   },
@@ -35,17 +35,17 @@
   "license": "MIT",
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-tools": "workspace:^",
-    "@deepseek-ai/dsh-util-values": "workspace:^"
+    "@deepseek-ai/dsh-tools": "workspace:*",
+    "@deepseek-ai/dsh-util-values": "workspace:*"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-util-workspace-path": "workspace:^",
+    "@deepseek-ai/dsh-util-workspace-path": "workspace:*",
     "@deepseek-ai/schemastery": "workspace:^",
     "playwright": "^1.61.1"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-tools": "workspace:^",
-    "@deepseek-ai/dsh-util-values": "workspace:^"
+    "@deepseek-ai/dsh-tools": "workspace:*",
+    "@deepseek-ai/dsh-util-values": "workspace:*"
   }
 }

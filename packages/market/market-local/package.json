@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-market-local",
   "description": "Generic A-share market overview over free Sina Finance quotes and daily K-lines: index levels, MA structure, returns, and a readable breadth summary",
-  "version": "0.2.1-rc.2",
+  "version": "0.2.2-rc.1",
   "publishConfig": { "access": "public" },
   "repository": { "type": "git", "url": "git+https://github.com/deepseek-ai/deepseek-harness.git", "directory": "packages/market/market-local" },
   "type": "module",
@@ -15,6 +15,6 @@
   },
   "files": ["lib/index.js", "lib/types/**/*.js", "lib/types/**/*.d.ts"],
   "license": "MIT",
-  "peerDependencies": { "@deepseek-ai/cordis": "workspace:^", "@deepseek-ai/dsh-tools": "workspace:^", "@deepseek-ai/dsh-util-values": "workspace:^" },
-  "devDependencies": { "@deepseek-ai/cordis": "workspace:^", "@deepseek-ai/dsh-tools": "workspace:^", "@deepseek-ai/dsh-util-values": "workspace:^" }
+  "peerDependencies": { "@deepseek-ai/cordis": "workspace:^", "@deepseek-ai/dsh-tools": "workspace:*", "@deepseek-ai/dsh-util-values": "workspace:*" },
+  "devDependencies": { "@deepseek-ai/cordis": "workspace:^", "@deepseek-ai/dsh-tools": "workspace:*", "@deepseek-ai/dsh-util-values": "workspace:*" }
 }

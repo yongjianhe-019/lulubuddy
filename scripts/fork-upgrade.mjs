@@ -12,7 +12,7 @@
  * reviewable step rather than a guess.
  */
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 
 const argv = process.argv.slice(2)
 const flag = (name) => argv.includes(name)
@@ -74,6 +74,57 @@ const FORK_OWNED = [
   'packages/market/market-local'
 ]
 
+
+// ── Release-family consistency (desktop packaging enforces both) ─────────────
+/**
+ * The desktop packager refuses to build unless every workspace package carries
+ * the root version and every intra-family dependency is an exact `workspace:*`.
+ * Both break silently during a version bump, so report them up front.
+ */
+function checkFamily() {
+  const root = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
+  const mismatched = []
+  const caret = []
+  for (const entry of readdirSync(new URL('../packages/', import.meta.url), { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue
+    let inner
+    try {
+      inner = readdirSync(new URL(`../packages/${entry.name}/`, import.meta.url), { withFileTypes: true })
+    } catch {
+      continue
+    }
+    for (const pkg of inner) {
+      if (!pkg.isDirectory()) continue
+      const path = `packages/${entry.name}/${pkg.name}/package.json`
+      let manifest
+      try {
+        manifest = JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'))
+      } catch {
+        continue
+      }
+      if (manifest.version !== root) mismatched.push(`${path} (${manifest.version})`)
+      for (const section of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+        for (const [name, range] of Object.entries(manifest[section] ?? {})) {
+          if (name.startsWith('@deepseek-ai/dsh-') && range !== 'workspace:*') {
+            caret.push(`${path}: ${section}.${name} = ${range}`)
+          }
+        }
+      }
+    }
+  }
+  if (!mismatched.length && !caret.length) return
+  console.log(`\n── release family (root ${root}) ─────────────────────────────────────`)
+  if (mismatched.length) {
+    console.log(`  ${mismatched.length} package(s) are not on the root version:`)
+    for (const m of mismatched.slice(0, 20)) console.log(`    ${m}`)
+  }
+  if (caret.length) {
+    console.log(`  ${caret.length} intra-family dependenc(ies) must be workspace:* (exact):`)
+    for (const c of caret.slice(0, 20)) console.log(`    ${c}`)
+  }
+  console.log('  The desktop packager rejects both. Fix before `pnpm run package:desktop:*`.')
+}
+
 const branch = git(['rev-parse', '--abbrev-ref', 'HEAD'])
 const FORK_BRANCH = value('--branch-base', 'main')
 const target = value('--to', 'origin/master')
@@ -82,6 +133,7 @@ console.log(`fork branch : ${branch}`)
 console.log(`upstream ref: ${target}\n`)
 
 git(['fetch', 'origin', '--tags', '--prune'], { allowFail: true })
+checkFamily()
 
 const counts = git(['rev-list', '--left-right', '--count', `${branch}...${target}`]).split(/\s+/)
 const [ahead, behind] = [Number(counts[0]), Number(counts[1])]

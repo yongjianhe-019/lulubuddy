@@ -70,12 +70,26 @@ git add -A && git commit
 Write the resolution down in the message: which file, which side, why. The next
 upgrade reads it.
 
-## 6. Install, typecheck, build
+## 6. Align the release family, install, typecheck, build
+
+The fork's own packages must carry the root version, and their intra-family
+dependencies must be `workspace:*` (exact). The desktop packager rejects both,
+and a version bump breaks them silently. `scripts/fork-upgrade.mjs` reports any
+mismatch under "release family".
 
 ```sh
+# every packages/*/* version must equal the root version
+# every "@deepseek-ai/dsh-*" dependency must be workspace:* (not workspace:^)
+
 pnpm install
 pnpm run typecheck        # 5 gates: typert, host/client compilers, aggregates
 pnpm run build:artifacts  # 8 gates: native, bundles, client artifacts, web build
+```
+
+To package the desktop app:
+
+```sh
+pnpm run package:desktop:mac:x64:unsigned   # Intel Mac; arm64 on Apple silicon
 ```
 
 `typecheck` alone is not enough: `pnpm dsh web` serves prebuilt client bundles
