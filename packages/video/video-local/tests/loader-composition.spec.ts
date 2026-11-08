@@ -161,12 +161,11 @@ async function boot(overrides: { readonly projectRoot?: string } = {}): Promise<
  * @returns the settled result.
  */
 async function execute(ctx: Context, name: string, args: Record<string, unknown>) {
-  return await ctx.tools.execute({
+  const batch = await ctx.tools.execute({
     signal: new AbortController().signal,
-    callId: ToolCallId(`loader-${name}`),
-    name,
-    arguments: args,
+    calls: [{ type: 'tool-call', id: ToolCallId(`loader-${name}`), name, arguments: JSON.stringify(args) }],
   })
+  return batch.results[0]!.result
 }
 
 /**

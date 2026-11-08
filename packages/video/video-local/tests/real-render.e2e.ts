@@ -91,12 +91,11 @@ async function boot(): Promise<Context> {
  * @returns the settled result.
  */
 async function execute(ctx: Context, name: string, args: Record<string, unknown>) {
-  return await ctx.tools.execute({
+  const batch = await ctx.tools.execute({
     signal: new AbortController().signal,
-    callId: ToolCallId(`real-${name}`),
-    name,
-    arguments: args,
+    calls: [{ type: 'tool-call', id: ToolCallId(`real-${name}`), name, arguments: JSON.stringify(args) }],
   })
+  return batch.results[0]!.result
 }
 
 describe.skipIf(!configured)('video-local real render', () => {

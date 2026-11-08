@@ -70,12 +70,11 @@ async function bench(answer: (invocation: VideoInvocation) => VideoOutcome = () 
     ctx,
     stub,
     async call(tool, args) {
-      const result = await ctx.tools.execute({
+      const batch = await ctx.tools.execute({
         signal: new AbortController().signal,
-        callId: ToolCallId(`spec-${tool}`),
-        name: tool,
-        arguments: args,
+        calls: [{ type: 'tool-call', id: ToolCallId(`spec-${tool}`), name: tool, arguments: JSON.stringify(args) }],
       })
+      const result = batch.results[0]!.result
       return {
         text: result.content.filter(block => block.type === 'text').map(block => block.text ?? '').join(''),
         meta: result.meta,
