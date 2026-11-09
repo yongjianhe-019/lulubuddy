@@ -2,9 +2,10 @@
 /**
  * fork-icons — regenerate every dsh icon surface from one square-ish image.
  *
- *   node scripts/fork-icons.mjs <image> [--face] [--app] [--dry]
+ *   node scripts/fork-icons.mjs <image> [--app] [--dry]
  *
- *   --face   crop to the top-centre square first (a head shot reads better at 32px)
+ *   App icons use the whole square; the in-app mark and the favicon use a
+ *   top-centre head crop, because a full-body render is unreadable at 24–32 px.
  *   --app    also patch the installed /Applications app and refresh its icon cache
  *   --dry    print the plan and write nothing
  *
@@ -30,12 +31,11 @@ const APP = '/Applications/DeepSeek Harness.app'
 
 const argv = process.argv.slice(2)
 const source = argv.find((a) => !a.startsWith('--'))
-const face = argv.includes('--face')
 const patchApp = argv.includes('--app')
 const dry = argv.includes('--dry')
 
 if (!source) {
-  console.error('usage: node scripts/fork-icons.mjs <image> [--face] [--app] [--dry]')
+  console.error('usage: node scripts/fork-icons.mjs <image> [--app] [--dry]')
   process.exit(1)
 }
 if (!existsSync(source)) {
@@ -99,7 +99,7 @@ const plan = [
 ]
 
 if (dry) {
-  console.log(`source ${width}×${height}${face ? ' (face crop for the small mark)' : ''}`)
+  console.log(`source ${width}×${height}`)
   console.log('would write:')
   for (const [p, s] of plan) console.log(`  ${p}  ${s}×${s}`)
   console.log('  apps/web/public/favicon.svg + favicon-dark.svg')
