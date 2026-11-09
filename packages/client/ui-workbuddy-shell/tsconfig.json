@@ -24,6 +24,9 @@
       "path": "../ui-sidebar"
     },
     {
+      "path": "../ui-conversation/tsconfig.client.json"
+    },
+    {
       "path": "../ui-sidebar-right"
     },
     {

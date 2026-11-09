@@ -23,7 +23,10 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // Type-only: pulls the tab registry service and both keyed tab seats.
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
+// Type-only: pulls the conversation SlotMap merge (conversation.hero.brand.mark).
+import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { CapabilityIcon } from './CapabilityIcon.tsx'
+import { LuluMark } from './LuluMark.tsx'
 import { CapabilityIndex } from './CapabilityIndex.tsx'
 import { SHELL_ID, shellDefinition } from './definition.ts'
 import { en, zh } from './locales.ts'
@@ -52,6 +55,17 @@ export function apply(ctx: ClientContext): void {
   const t = ctx.locale.bind(NS)
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-workbuddy-shell: dictionaries')
   ctx.effect(() => ctx.sidebarRightTabs.register(shellDefinition(t)), 'ui-workbuddy-shell: results type')
+
+  // The operator's mascot replaces the harness fish in both brand seats. Both are
+  // `single`/root, so this occupant displaces the shell's fallback and nothing else.
+  ctx.effect(() => ctx.slots.inject('sidebar.brand.mark', () => ctx.slots.register(
+    { name: 'sidebar.brand.mark' },
+    LuluMark,
+  )), 'ui-workbuddy-shell: sidebar brand mark')
+  ctx.effect(() => ctx.slots.inject('conversation.hero.brand.mark', () => ctx.slots.register(
+    { name: 'conversation.hero.brand.mark' },
+    LuluMark,
+  )), 'ui-workbuddy-shell: hero brand mark')
 
   ctx.effect(() => ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
     name: 'sidebar.panellist',
