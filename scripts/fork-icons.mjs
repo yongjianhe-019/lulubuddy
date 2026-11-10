@@ -2,10 +2,11 @@
 /**
  * fork-icons — regenerate every dsh icon surface from one square-ish image.
  *
- *   node scripts/fork-icons.mjs <image> [--app] [--dry]
+ *   node scripts/fork-icons.mjs <image> [--mark <cutout.png>] [--app] [--dry]
  *
- *   App icons use the whole square; the in-app mark and the favicon use a
- *   top-centre head crop, because a full-body render is unreadable at 24–32 px.
+ *   App icons use the whole square. The in-app mark and the favicon use
+ *   `--mark` when given (a background-removed cutout, which reads as a
+ *   character rather than a cropped photo), otherwise a top-centre head crop.
  *   --app    also patch the installed /Applications app and refresh its icon cache
  *   --dry    print the plan and write nothing
  *
@@ -32,10 +33,11 @@ const APP = '/Applications/DeepSeek Harness.app'
 const argv = process.argv.slice(2)
 const source = argv.find((a) => !a.startsWith('--'))
 const patchApp = argv.includes('--app')
+const markSource = (() => { const i = argv.indexOf('--mark'); return i >= 0 && argv[i + 1] ? argv[i + 1] : undefined })()
 const dry = argv.includes('--dry')
 
 if (!source) {
-  console.error('usage: node scripts/fork-icons.mjs <image> [--app] [--dry]')
+  console.error('usage: node scripts/fork-icons.mjs <image> [--mark <cutout.png>] [--app] [--dry]')
   process.exit(1)
 }
 if (!existsSync(source)) {
@@ -117,14 +119,20 @@ for (const [rel, size] of plan) {
   written.set(rel, dest)
 }
 const faviconPng = join(work, 'favicon.png')
-png(faceSq, 128, faviconPng)
+if (markSource === undefined) png(faceSq, 128, faviconPng)
+else run('sips', ['-z', '128', '128', markSource, '--out', faviconPng])
 svgWrap(faviconPng, join(ROOT, 'apps/web/public/favicon.svg'))
 svgWrap(faviconPng, join(ROOT, 'apps/web/public/favicon-dark.svg'))
 
 // The in-app mark: a 256 px head crop inlined into the client bundle, so the two
 // brand seats need no asset server and the plugin stays a single JS module.
 const markPng = join(work, 'mark.png')
-png(faceSq, 256, markPng)
+if (markSource === undefined) {
+  png(faceSq, 256, markPng)
+} else {
+  run('sips', ['-z', '256', '256', markSource, '--out', markPng])
+  console.log(`  (mark from ${markSource})`)
+}
 const markB64 = readFileSync(markPng).toString('base64')
 const markModule = join(ROOT, 'packages/client/ui-workbuddy-shell/src/client/lulu-mark.generated.ts')
 writeFileSync(markModule, `/**

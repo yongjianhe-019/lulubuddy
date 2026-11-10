@@ -26,7 +26,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 // Type-only: pulls the conversation SlotMap merge (conversation.hero.brand.mark).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { CapabilityIcon } from './CapabilityIcon.tsx'
-import { LuluMark } from './LuluMark.tsx'
+import { HeroLuluMark, LuluMark } from './LuluMark.tsx'
 import { CapabilityIndex } from './CapabilityIndex.tsx'
 import { SHELL_ID, shellDefinition } from './definition.ts'
 import { en, zh } from './locales.ts'
@@ -64,7 +64,7 @@ export function apply(ctx: ClientContext): void {
   )), 'ui-workbuddy-shell: sidebar brand mark')
   ctx.effect(() => ctx.slots.inject('conversation.hero.brand.mark', () => ctx.slots.register(
     { name: 'conversation.hero.brand.mark' },
-    LuluMark,
+    HeroLuluMark,
   )), 'ui-workbuddy-shell: hero brand mark')
 
   ctx.effect(() => ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
