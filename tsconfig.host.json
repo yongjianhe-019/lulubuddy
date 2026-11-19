@@ -287,6 +287,7 @@
     { "path": "./packages/design/ppt-local" },
     { "path": "./packages/design/motion-local" },
     { "path": "./packages/design/image-local" },
+    { "path": "./packages/video/douyin-local" },
     { "path": "./packages/video/video-local" },
     { "path": "./packages/video/xhs-local" },
     { "path": "./packages/experimental/client-ui-cot-translation/tsconfig.host.json" },

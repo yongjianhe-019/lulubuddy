@@ -92,6 +92,12 @@ export const SCENARIOS: readonly Scenario[] = [
         presetId: 'video',
       },
       {
+        id: 'douyin',
+        labelKey: 'design.douyin',
+        templateKey: 'design.douyin.template',
+        presetId: 'douyin',
+      },
+      {
         id: 'xhs',
         labelKey: 'design.xhs',
         templateKey: 'design.xhs.template',

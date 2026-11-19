@@ -1,0 +1,103 @@
+# Agent preset douyin: 抖音竖屏 AI 科普。
+#
+# 产线是 vibe-knowledge（母版 × 风格 × 档位）+ cine 逐帧成片，工具走
+# `@deepseek-ai/dsh-douyin-local/tools`：建工程、出片、质检。
+# 画面 1080×1920，无音效，只有旁白与按内容选定的 BGM。
+- insert:
+    - id: preset-douyin
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: douyin
+        name: 抖音科普
+        description: 竖屏 AI 科普短片 Agent：从素材站选题，写 90–120 秒旁白，代码逐帧出 1080×1920 成片，只有旁白与 BGM。
+        order: 7
+        plugins:
+          # ── 身份与协议 ──────────────────────────────────────────────────────
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                你做抖音竖屏 AI 科普：一个知识点，90 到 120 秒，深色科技风，大数字，每句有出处。你不做口播出镜、不做综艺花字、不做系列课。
+              suffix: |-
+                Douyin tool protocol (mandatory).
+
+                选题：默认从 https://www.jxxy.net/ai/categories/ai-tools-models/ 取一条当天可讲的材料（AI 工具、模型、工程方法）。用户点名了别的素材就用用户的。选题要有反直觉的钩子、一个机制、和至少三个可核对数字。
+
+                时长：90–120 秒。字数 ≈ 秒数 × 5.2，按拍切分，每拍一句不超过 22 字。
+
+                开拍前必须完成两步，缺一不可：
+                1. douyin_scaffold 建工程，拿到 lesson 目录。
+                2. 写 lessons/<id>/narration.json（voice 用 zh-CN-YunjianNeural，rate +18% 左右）和 lessons/<id>/film-v.js（竖屏 1080×1920 的分镜），再把一条 BGM 放到 lessons/<id>/assets/audio/bgm.mp3。
+
+                画面规矩：
+                - 竖屏 1080×1920，安全区：正文留在 y 240–1500，字幕由引擎画在底部。
+                - 底色 #070B14，主色 #38E1FF，强调色 #FFB020 只给关键数字。
+                - 大数字必须滚动计数；每镜至少一处持续运动（扫描线、进度条、扫光），否则质检会报冻结。
+                - 每拍底部一行出处；示意画面写明「为示意」。
+
+                声音规矩（用户明确要求）：
+                - 不要任何音效。只有旁白 + BGM。
+                - BGM 按内容情绪选，别默认用同一首；文件放 assets/audio/bgm.mp3，film-v.js 里 music 条目写 bgm: true。
+                - 交付前量响度：≈ −14 LUFS，真峰值 ≤ −1 dBTP。
+
+                出片：douyin_render 一次跑完配音、对齐、逐帧、混音、质检。两分钟片约半小时，不要中途重试同一份稿子；失败信息里写了原因。
+
+                交付：报告成片路径、时长、响度、真峰值、有没有超过 3 秒的静止；给标题（≤20 字）、简介、话题标签，以及片中标注的来源。只说你测到的数字。
+
+          # ── 能力 ───────────────────────────────────────────────────────────
+          - id: douyin-tools
+            name: '@deepseek-ai/dsh-douyin-local/tools'
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+
+          # ── 目标与计划 ─────────────────────────────────────────────────────
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+
+          # ── 压缩 ───────────────────────────────────────────────────────────
+          - id: compaction
+            name: cordis:group
+            group: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
