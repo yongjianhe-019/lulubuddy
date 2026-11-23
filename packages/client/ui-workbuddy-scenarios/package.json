@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-workbuddy-scenarios",
   "description": "WorkBuddy scenario tabs: the two-level scenario and sub-scenario selector above the composer, whose picks seed the input draft or open a session on a named agent preset",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

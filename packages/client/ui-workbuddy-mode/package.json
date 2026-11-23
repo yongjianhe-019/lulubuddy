@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-workbuddy-mode",
   "description": "WorkBuddy mode control: the Ask / Plan / Craft segmented control over the plan and permissions projections",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

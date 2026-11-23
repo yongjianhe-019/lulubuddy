@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-ppt-view",
   "description": "Presentation result card: HTML preview in the document iframe and a high-fidelity PPTX download",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-video-local",
   "description": "Short-video production capability: the ctx.video service, its local provider over a Remotion render project and edge-tts narration, and the setup, voice, and creation tools an agent preset mounts",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

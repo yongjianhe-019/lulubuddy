@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-workbuddy-shell",
   "description": "WorkBuddy shell surfaces: the left capability navigation and the right results-area tab, both read-only indexes over the DSH capabilities that back each WorkBuddy surface",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-xhs-local",
   "description": "Xiaohongshu post packaging capability: writes the post draft and publish copy, runs the two publication gates, updates the operations index, and serves the finished video for the Web card",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

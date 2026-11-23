@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-douyin-local",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "type": "module",
   "description": "Vertical 1080x1920 Douyin explainer tools over the local vibe-knowledge + cine pipeline.",
   "exports": {

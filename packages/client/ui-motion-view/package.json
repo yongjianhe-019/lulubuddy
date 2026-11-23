@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-motion-view",
   "description": "Motion-graphics result card: in-place MP4 player, poster, contact sheet, QC facts, downloads, and source navigation",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

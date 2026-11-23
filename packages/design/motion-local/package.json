@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-motion-local",
   "description": "Motion-graphics video capability: scaffold a frame-pure HTML composition, render it with Playwright and ffmpeg, synthesize beat-synced sound, and deliver a QC'd MP4",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

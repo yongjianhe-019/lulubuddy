@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-ppt-local",
   "description": "Presentation production capability: scaffold a styled HTML deck, preview it in the document iframe, and export a high-fidelity image-based PPTX",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },

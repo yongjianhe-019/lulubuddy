@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-xhs-view",
   "description": "Dedicated Web card for a packaged Xiaohongshu post: inline video, title, body, hashtags, pinned comment, publication gates, and copy actions",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.3-alpha.2",
   "publishConfig": {
     "access": "public"
   },
