@@ -9,7 +9,7 @@
  * fish, so the fork builds and runs identically before and after a re-skin.
  */
 import { FishLogo } from '@deepseek-ai/dsh-client-ui-primitives'
-import { Lulu3D } from './Lulu3D.tsx'
+import { Lulu2D } from './Lulu2D.tsx'
 import { LULU_MARK_PNG } from './lulu-mark.generated.ts'
 
 /** Geometry both brand seats supply. */
@@ -50,14 +50,6 @@ export function LuluMark({ size, className, scale = 1 }: LuluMarkProps) {
   )
 }
 
-/**
- * The cutout, kept as the fallback the 3D seat shows without WebGL.
- * @param props - the same geometry the hero supplies.
- * @returns the generated PNG, or the shipped fish before a mascot exists.
- */
-function MarkPng({ size, className, scale = 1 }: LuluMarkProps) {
-  return <LuluMark size={size} className={className} scale={scale} />
-}
 
 /**
  * The hero seat's occupant: the same mark, drawn larger than the 34 px the seat
@@ -66,12 +58,6 @@ function MarkPng({ size, className, scale = 1 }: LuluMarkProps) {
  * @returns the enlarged mark.
  */
 export function HeroLuluMark({ size, className }: Omit<LuluMarkProps, 'scale'>) {
-  const edge = Math.round(size * 2.1)
-  return (
-    <Lulu3D
-      size={edge}
-      className={className}
-      fallback={<MarkPng size={size} className={className} scale={2.1} />}
-    />
-  )
+  const edge = Math.round(size * 3.5)
+  return <Lulu2D size={edge} className={className} />
 }
