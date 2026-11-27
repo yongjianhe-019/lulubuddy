@@ -9,7 +9,7 @@
  * fish, so the fork builds and runs identically before and after a re-skin.
  */
 import { FishLogo } from '@deepseek-ai/dsh-client-ui-primitives'
-import { LuluPose } from './LuluPose.tsx'
+import { LuluMascot } from './LuluMascot.tsx'
 import { LULU_MARK_PNG } from './lulu-mark.generated.ts'
 
 /** Geometry both brand seats supply. */
@@ -59,5 +59,5 @@ export function LuluMark({ size, className, scale = 1 }: LuluMarkProps) {
  */
 export function HeroLuluMark({ size, className }: Omit<LuluMarkProps, 'scale'>) {
   const height = Math.round(size * 5.2)
-  return <LuluPose size={height} className={className} />
+  return <LuluMascot size={height} className={className} />
 }
